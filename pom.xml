@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+
+  <version>1.0.0-SNAPSHOT</version>
+  <groupId>com.ifedorenko.p2-browser</groupId>
+  <artifactId>p2-browser</artifactId>
+  <packaging>pom</packaging>
+
+  <properties>
+    <tycho-version>0.13.0-SNAPSHOT</tycho-version>
+  </properties>
+
+  <modules>
+    <module>com.ifedorenko.p2browser</module>
+    <module>com.ifedorenko.p2browser.feature</module>
+    <module>com.ifedorenko.p2browser.rcp</module>
+  </modules>
+
+  <repositories>
+    <repository>
+      <id>eclipse</id>
+      <url>http://download.eclipse.org/releases/indigo</url>
+      <layout>p2</layout>
+    </repository>
+  </repositories>
+
+  <build>
+    <plugins>
+      <plugin>
+        <groupId>org.eclipse.tycho</groupId>
+        <artifactId>tycho-maven-plugin</artifactId>
+        <version>${tycho-version}</version>
+        <extensions>true</extensions>
+      </plugin>
+      <plugin>
+        <groupId>org.eclipse.tycho</groupId>
+        <artifactId>target-platform-configuration</artifactId>
+        <version>${tycho-version}</version>
+        <configuration>
+          <environments>
+            <environment>
+              <os>win32</os>
+              <ws>win32</ws>
+              <arch>x86</arch>
+            </environment>
+            <environment>
+              <os>linux</os>
+              <ws>gtk</ws>
+              <arch>x86_64</arch>
+            </environment>
+            <environment>
+              <os>macosx</os>
+              <ws>cocoa</ws>
+              <arch>x86_64</arch>
+            </environment>
+          </environments>
+        </configuration>
+      </plugin>
+    </plugins>
+  </build>
+
+</project>

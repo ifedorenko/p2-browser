@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<feature
+      id="com.ifedorenko.p2browser.feature"
+      label="P2 Broswer"
+      version="1.0.0.qualifier"
+      provider-name="IFEDORENKO">
+
+   <description url="http://www.example.com/description">
+      [Enter Feature Description here.]
+   </description>
+
+   <copyright url="http://www.example.com/copyright">
+      [Enter Copyright Description here.]
+   </copyright>
+
+   <license url="http://www.example.com/license">
+      [Enter License Description here.]
+   </license>
+
+   <requires>
+      <import feature="org.eclipse.equinox.p2.core.feature" version="1.0.0" match="greaterOrEqual"/>
+      <import feature="org.eclipse.rcp" version="3.7.0" match="greaterOrEqual"/>
+   </requires>
+
+   <plugin
+         id="com.ifedorenko.p2browser"
+         download-size="0"
+         install-size="0"
+         version="0.0.0"
+         unpack="false"/>
+
+</feature>

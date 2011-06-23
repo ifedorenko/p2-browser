@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?pde version="3.5"?>
+
+<product 
+      name="P2 Browser" 
+      uid="com.ifedorenko.p2browser.rcp" 
+      id="com.ifedorenko.p2browser.p2browser" 
+      application="com.ifedorenko.p2browser.application" 
+      version="1.0.0.qualifier" 
+      useFeatures="true" 
+      includeLaunchers="true">
+
+   <configIni use="default">
+   </configIni>
+
+   <launcherArgs>
+      <vmArgsMac>-XstartOnFirstThread -Dorg.eclipse.swt.internal.carbon.smallFonts</vmArgsMac>
+   </launcherArgs>
+
+   <features>
+      <feature id="com.ifedorenko.p2browser.feature" version="0.0.0"/>
+   </features>
+
+   <configurations>
+      <plugin id="org.eclipse.core.runtime" autoStart="true" startLevel="0" />
+      <plugin id="org.eclipse.equinox.ds" autoStart="true" startLevel="0" />
+   </configurations>
+
+</product>
