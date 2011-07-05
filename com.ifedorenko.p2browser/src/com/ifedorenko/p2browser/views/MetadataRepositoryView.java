@@ -39,6 +39,7 @@ import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Combo;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Display;
+import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Text;
 import org.eclipse.swt.widgets.Tree;
 import org.eclipse.ui.forms.widgets.FormToolkit;
@@ -49,7 +50,6 @@ import com.ifedorenko.p2browser.dialogs.RepositoryLocationDialog;
 import com.ifedorenko.p2browser.model.IGroupedInstallableUnits;
 import com.ifedorenko.p2browser.model.IncludedInstallableUnits;
 import com.ifedorenko.p2browser.model.UngroupedInstallableUnits;
-import org.eclipse.swt.widgets.Label;
 
 @SuppressWarnings( "restriction" )
 public class MetadataRepositoryView
@@ -155,9 +155,9 @@ public class MetadataRepositoryView
             gl_composite.marginWidth = 0;
             composite.setLayout( gl_composite );
             {
-                Label lblView = new Label(composite, SWT.NONE);
-                toolkit.adapt(lblView, true, true);
-                lblView.setText("Repositories");
+                Label lblView = new Label( composite, SWT.NONE );
+                toolkit.adapt( lblView, true, true );
+                lblView.setText( "Repositories" );
             }
             {
                 Button btnAdd = new Button( composite, SWT.NONE );
@@ -173,7 +173,7 @@ public class MetadataRepositoryView
                         }
                     }
                 } );
-                GridData gd_btnAdd = new GridData( SWT.LEFT, SWT.TOP, false, false, 1, 1 );
+                GridData gd_btnAdd = new GridData( SWT.FILL, SWT.TOP, false, false, 1, 1 );
                 gd_btnAdd.horizontalIndent = 10;
                 btnAdd.setLayoutData( gd_btnAdd );
                 toolkit.adapt( btnAdd, true, true );
@@ -181,22 +181,38 @@ public class MetadataRepositoryView
             }
             {
                 Button btnRemove = new Button( composite, SWT.NONE );
-                GridData gd_btnRemove = new GridData(SWT.LEFT, SWT.CENTER, false, false, 1, 1);
+                GridData gd_btnRemove = new GridData( SWT.FILL, SWT.CENTER, false, false, 1, 1 );
                 gd_btnRemove.horizontalIndent = 10;
-                btnRemove.setLayoutData(gd_btnRemove);
+                btnRemove.setLayoutData( gd_btnRemove );
                 toolkit.adapt( btnRemove, true, true );
                 btnRemove.setText( "Remove" );
             }
             {
-                Label lblView = new Label(composite, SWT.NONE);
-                toolkit.adapt(lblView, true, true);
-                lblView.setText("View");
+                Button btnReloadAll = new Button( composite, SWT.NONE );
+                btnReloadAll.addSelectionListener( new SelectionAdapter()
+                {
+                    @Override
+                    public void widgetSelected( SelectionEvent e )
+                    {
+                        reloadAllRepositories();
+                    }
+                } );
+                GridData gd_btnReloadAll = new GridData( SWT.FILL, SWT.CENTER, false, false, 1, 1 );
+                gd_btnReloadAll.horizontalIndent = 10;
+                btnReloadAll.setLayoutData( gd_btnReloadAll );
+                toolkit.adapt( btnReloadAll, true, true );
+                btnReloadAll.setText( "Reload all" );
+            }
+            {
+                Label lblView = new Label( composite, SWT.NONE );
+                toolkit.adapt( lblView, true, true );
+                lblView.setText( "View" );
             }
             {
                 final Button btnGroupInlcuded = new Button( composite, SWT.CHECK );
-                GridData gd_btnGroupInlcuded = new GridData(SWT.LEFT, SWT.CENTER, false, false, 1, 1);
+                GridData gd_btnGroupInlcuded = new GridData( SWT.LEFT, SWT.CENTER, false, false, 1, 1 );
                 gd_btnGroupInlcuded.horizontalIndent = 10;
-                btnGroupInlcuded.setLayoutData(gd_btnGroupInlcuded);
+                btnGroupInlcuded.setLayoutData( gd_btnGroupInlcuded );
                 btnGroupInlcuded.addSelectionListener( new SelectionAdapter()
                 {
                     @Override
@@ -213,9 +229,9 @@ public class MetadataRepositoryView
             }
             {
                 final Button btnChildRepositories = new Button( composite, SWT.CHECK );
-                GridData gd_btnChildRepositories = new GridData(SWT.LEFT, SWT.CENTER, false, false, 1, 1);
+                GridData gd_btnChildRepositories = new GridData( SWT.LEFT, SWT.CENTER, false, false, 1, 1 );
                 gd_btnChildRepositories.horizontalIndent = 10;
-                btnChildRepositories.setLayoutData(gd_btnChildRepositories);
+                btnChildRepositories.setLayoutData( gd_btnChildRepositories );
                 btnChildRepositories.setToolTipText( "Reveal composite repository structure" );
                 btnChildRepositories.addSelectionListener( new SelectionAdapter()
                 {
@@ -328,6 +344,58 @@ public class MetadataRepositoryView
         };
     }
 
+    protected void reloadAllRepositories()
+    {
+        Job job = new Job( "Load repository metadata" )
+        {
+            @Override
+            protected IStatus run( IProgressMonitor monitor )
+            {
+                try
+                {
+                    final Map<URI, IMetadataRepository> repositories = new LinkedHashMap<URI, IMetadataRepository>();
+
+                    final Map<URI, IMetadataRepository> allrepositories = new LinkedHashMap<URI, IMetadataRepository>();
+
+                    IMetadataRepositoryManager repoMgr = Activator.getRepositoryManager();
+
+                    for ( URI location : MetadataRepositoryView.this.repositories.keySet() )
+                    {
+                        IMetadataRepository repository = repoMgr.refreshRepository( location, monitor );
+
+                        if ( repository != null )
+                        {
+                            repositories.put( location, repository );
+                            allrepositories.put( location, repository );
+                        }
+                    }
+
+                    MetadataRepositoryView.this.repositories.clear();
+                    MetadataRepositoryView.this.repositories.putAll( repositories );
+
+                    MetadataRepositoryView.this.allrepositories.clear();
+                    MetadataRepositoryView.this.allrepositories.putAll( allrepositories );
+
+                    MetadataRepositoryView.this.repositoryContent.clear();
+
+                    refreshTreeInDisplayThread();
+
+                    return Status.OK_STATUS;
+                }
+                catch ( ProvisionException e )
+                {
+                    return e.getStatus();
+                }
+                catch ( OperationCanceledException e )
+                {
+                    return Status.CANCEL_STATUS;
+                }
+            }
+        };
+        job.setUser( true );
+        job.schedule();
+    }
+
     private IQueryable<IInstallableUnit> toQueryable( Collection<IMetadataRepository> repositories )
     {
         return QueryUtil.compoundQueryable( repositories );
@@ -350,6 +418,7 @@ public class MetadataRepositoryView
                     {
                         repositories.put( location, repository );
                         allrepositories.put( location, repository );
+                        repositoryContent.remove( location );
 
                         refreshTreeInDisplayThread();
                     }
