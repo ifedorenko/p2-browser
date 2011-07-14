@@ -26,7 +26,8 @@ import org.eclipse.equinox.p2.metadata.expression.IMatchExpression;
 import org.eclipse.equinox.p2.query.*;
 import org.eclipse.osgi.util.NLS;
 
-import com.ifedorenko.p2browser.model.InstallableUnitInfo;
+import com.ifedorenko.p2browser.director.DependencyMesh;
+import com.ifedorenko.p2browser.director.InstallableUnitInfo;
 
 @SuppressWarnings( "restriction" )
 public class Slicer {

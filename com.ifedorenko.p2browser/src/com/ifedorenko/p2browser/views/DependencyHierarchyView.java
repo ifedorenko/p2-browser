@@ -1,3 +1,14 @@
+/*******************************************************************************
+ * Copyright (c) 2011 Igor Fedorenko
+ * All rights reserved. This program and the accompanying materials
+ * are made available under the terms of the Eclipse Public License v1.0
+ * which accompanies this distribution, and is available at
+ * http://www.eclipse.org/legal/epl-v10.html
+ *
+ * Contributors:
+ *      Igor Fedorenko - initial API and implementation
+ *******************************************************************************/
+
 package com.ifedorenko.p2browser.views;
 
 import java.util.ArrayList;
@@ -40,10 +51,10 @@ import org.eclipse.swt.widgets.Table;
 import org.eclipse.swt.widgets.Tree;
 import org.eclipse.ui.part.ViewPart;
 
+import com.ifedorenko.p2browser.director.DependencyMesh;
 import com.ifedorenko.p2browser.model.IGroupedInstallableUnits;
 import com.ifedorenko.p2browser.model.InstallableUnitDependencyTree;
 
-import copied.org.eclipse.equinox.internal.p2.director.DependencyMesh;
 import copied.org.eclipse.equinox.internal.p2.director.PermissiveSlicer;
 
 @SuppressWarnings( "restriction" )
