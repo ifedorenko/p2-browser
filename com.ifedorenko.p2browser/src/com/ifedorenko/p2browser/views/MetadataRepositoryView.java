@@ -11,14 +11,17 @@
 
 package com.ifedorenko.p2browser.views;
 
+import java.io.File;
 import java.lang.reflect.InvocationTargetException;
 import java.net.URI;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
@@ -49,6 +52,7 @@ import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Combo;
 import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.DirectoryDialog;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Text;
@@ -215,6 +219,22 @@ public class MetadataRepositoryView
                 btnReloadAll.setText( "Reload all" );
             }
             {
+                Button btnSaveAs = new Button( composite, SWT.NONE );
+                btnSaveAs.addSelectionListener( new SelectionAdapter()
+                {
+                    @Override
+                    public void widgetSelected( SelectionEvent e )
+                    {
+                        saveAsRepository();
+                    }
+                } );
+                GridData gd_btnSaveAs = new GridData( SWT.FILL, SWT.CENTER, false, false, 1, 1 );
+                gd_btnSaveAs.horizontalIndent = 10;
+                btnSaveAs.setLayoutData( gd_btnSaveAs );
+                toolkit.adapt( btnSaveAs, true, true );
+                btnSaveAs.setText( "Save As..." );
+            }
+            {
                 Label lblView = new Label( composite, SWT.NONE );
                 toolkit.adapt( lblView, true, true );
                 lblView.setText( "View" );
@@ -353,6 +373,51 @@ public class MetadataRepositoryView
                 return toQueryable( repositories.values() );
             }
         };
+    }
+
+    protected void saveAsRepository()
+    {
+        DirectoryDialog fd = new DirectoryDialog( getViewSite().getShell() );
+        final String path = fd.open();
+        final List<IMetadataRepository> repositories = new ArrayList<IMetadataRepository>( this.repositories.values() );
+        Job job = new Job( "Saving repository" )
+        {
+            @Override
+            protected IStatus run( IProgressMonitor monitor )
+            {
+                IMetadataRepositoryManager repoMgr = Activator.getRepositoryManager();
+                try
+                {
+                    File directory = new File( path );
+                    directory.mkdirs();
+                    IMetadataRepository target =
+                        repoMgr.createRepository( directory.toURI(), directory.getName(),
+                                                  IMetadataRepositoryManager.TYPE_SIMPLE_REPOSITORY,
+                                                  new HashMap<String, String>() );
+
+                    Set<IInstallableUnit> units = new LinkedHashSet<IInstallableUnit>();
+
+                    for ( IMetadataRepository repositoy : repositories )
+                    {
+                        units.addAll( repositoy.query( QueryUtil.ALL_UNITS, monitor ).toUnmodifiableSet() );
+                    }
+
+                    target.addInstallableUnits( units );
+
+                    return Status.OK_STATUS;
+                }
+                catch ( ProvisionException e )
+                {
+                    return e.getStatus();
+                }
+                catch ( OperationCanceledException e )
+                {
+                    return Status.CANCEL_STATUS;
+                }
+            }
+        };
+        job.setUser( true );
+        job.schedule();
     }
 
     protected void reloadAllRepositories()
