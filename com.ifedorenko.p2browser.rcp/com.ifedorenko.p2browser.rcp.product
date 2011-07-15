@@ -13,6 +13,8 @@
    <configIni use="default">
    </configIni>
 
+   <launcher name="p2browser"/>
+ 
    <launcherArgs>
       <vmArgsMac>-XstartOnFirstThread -Dorg.eclipse.swt.internal.carbon.smallFonts</vmArgsMac>
    </launcherArgs>
