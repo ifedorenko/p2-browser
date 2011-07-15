@@ -11,54 +11,48 @@
 
 package com.ifedorenko.p2browser.model;
 
+import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Collections;
-import java.util.LinkedHashSet;
-import java.util.Set;
+import java.util.Iterator;
+import java.util.LinkedHashMap;
+import java.util.Map;
 
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.equinox.p2.metadata.IInstallableUnit;
 import org.eclipse.equinox.p2.query.IQueryable;
 import org.eclipse.equinox.p2.query.QueryUtil;
 
+import com.ifedorenko.p2browser.director.InstallableUnitDAG;
+import com.ifedorenko.p2browser.director.InstallableUnitInfo;
+
 public class UngroupedInstallableUnits
-    implements IGroupedInstallableUnits
 {
-    private Set<IInstallableUnit> units;
 
-    public UngroupedInstallableUnits( Collection<IInstallableUnit> units )
+    public InstallableUnitDAG toInstallableUnitDAG( Iterator<IInstallableUnit> iter )
     {
-        this.units = Collections.unmodifiableSet( new LinkedHashSet<IInstallableUnit>( units ) );
+        Collection<IInstallableUnit> collection = new ArrayList<IInstallableUnit>();
+        Map<IInstallableUnit, InstallableUnitInfo> map = new LinkedHashMap<IInstallableUnit, InstallableUnitInfo>();
+
+        while ( iter.hasNext() )
+        {
+            IInstallableUnit unit = iter.next();
+            InstallableUnitInfo info = new InstallableUnitInfo( unit );
+            collection.add( unit );
+            map.put( unit, info );
+        }
+
+        return new InstallableUnitDAG( toArray( collection ), map );
     }
 
-    @Override
-    public int size()
+    public InstallableUnitDAG toInstallableUnitDAG( IQueryable<IInstallableUnit> queryable, IProgressMonitor monitor )
     {
-        return units.size();
+        Iterator<IInstallableUnit> iter = queryable.query( QueryUtil.ALL_UNITS, monitor ).iterator();
+        return toInstallableUnitDAG( iter );
     }
 
-    @Override
-    public Collection<IInstallableUnit> getInstallableUnits()
+    private static IInstallableUnit[] toArray( Collection<IInstallableUnit> units )
     {
-        return units;
-    }
-
-    @Override
-    public Collection<IInstallableUnit> getIncludedInstallableUnits( IInstallableUnit unit, boolean transitive )
-    {
-        return Collections.emptySet();
-    }
-
-    @Override
-    public Collection<IInstallableUnit> getRootIncludedInstallableUnits()
-    {
-        return units;
-    }
-
-    public static UngroupedInstallableUnits getInstallableUnits( IQueryable<IInstallableUnit> queryable,
-                                                                 IProgressMonitor monitor )
-    {
-        return new UngroupedInstallableUnits( queryable.query( QueryUtil.ALL_UNITS, monitor ).toUnmodifiableSet() );
+        return units.toArray( new IInstallableUnit[units.size()] );
     }
 
 }

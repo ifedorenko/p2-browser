@@ -19,16 +19,16 @@ import java.util.Set;
 
 import org.eclipse.equinox.p2.metadata.IInstallableUnit;
 
-import com.ifedorenko.p2browser.director.DependencyDAG;
+import com.ifedorenko.p2browser.director.InstallableUnitDAG;
 import com.ifedorenko.p2browser.director.InstallableUnitInfo;
 
 public class InstallableUnitDependencyTree
     implements IGroupedInstallableUnits
 {
 
-    private final DependencyDAG dependencyDAG;
+    private final InstallableUnitDAG dependencyDAG;
 
-    public InstallableUnitDependencyTree( DependencyDAG dependencyTree )
+    public InstallableUnitDependencyTree( InstallableUnitDAG dependencyTree )
     {
         this.dependencyDAG = dependencyTree;
     }

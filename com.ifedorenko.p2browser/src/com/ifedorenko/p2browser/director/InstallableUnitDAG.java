@@ -26,13 +26,13 @@ import org.eclipse.equinox.p2.query.IQueryable;
 import com.ifedorenko.p2browser.model.match.IInstallableUnitMatcher;
 
 @SuppressWarnings( "restriction" )
-public class DependencyDAG
+public class InstallableUnitDAG
 {
     private final IInstallableUnit[] rootIUs;
 
     private final Map<IInstallableUnit, InstallableUnitInfo> units;
 
-    public DependencyDAG( IInstallableUnit[] rootIUs, Map<IInstallableUnit, InstallableUnitInfo> units )
+    public InstallableUnitDAG( IInstallableUnit[] rootIUs, Map<IInstallableUnit, InstallableUnitInfo> units )
     {
         this.rootIUs = rootIUs;
         this.units = Collections.unmodifiableMap( new LinkedHashMap<IInstallableUnit, InstallableUnitInfo>( units ) );
@@ -56,7 +56,7 @@ public class DependencyDAG
         return new QueryableArray( set.toArray( new IInstallableUnit[set.size()] ) );
     }
 
-    public DependencyDAG filter( IInstallableUnitMatcher matcher )
+    public InstallableUnitDAG filter( IInstallableUnitMatcher matcher )
     {
         Map<IInstallableUnit, InstallableUnitInfo> filtered =
             new LinkedHashMap<IInstallableUnit, InstallableUnitInfo>();
@@ -92,7 +92,7 @@ public class DependencyDAG
             }
         }
 
-        return new DependencyDAG( rootIUs, filtered );
+        return new InstallableUnitDAG( rootIUs, filtered );
     }
 
     public InstallableUnitInfo getInstallableUnit( IInstallableUnit unit )

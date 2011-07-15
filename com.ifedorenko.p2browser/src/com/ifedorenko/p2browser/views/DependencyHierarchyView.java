@@ -51,7 +51,7 @@ import org.eclipse.swt.widgets.Table;
 import org.eclipse.swt.widgets.Tree;
 import org.eclipse.ui.part.ViewPart;
 
-import com.ifedorenko.p2browser.director.DependencyDAG;
+import com.ifedorenko.p2browser.director.InstallableUnitDAG;
 import com.ifedorenko.p2browser.model.IGroupedInstallableUnits;
 import com.ifedorenko.p2browser.model.InstallableUnitDependencyTree;
 import com.ifedorenko.p2browser.model.match.IInstallableUnitMatcher;
@@ -277,7 +277,7 @@ public class DependencyHierarchyView
 
         Map<String, String> context = Collections.<String, String> emptyMap();
         PermissiveSlicer slicer = new PermissiveSlicer( allIUs, context, true, false, true, false, false );
-        DependencyDAG mesh = slicer.slice( toArray( rootIUs ), monitor );
+        InstallableUnitDAG mesh = slicer.slice( toArray( rootIUs ), monitor );
 
         // TODO is it okay to use permissive slicer here?
 

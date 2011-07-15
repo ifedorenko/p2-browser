@@ -62,8 +62,10 @@ import org.eclipse.ui.part.ViewPart;
 
 import com.ifedorenko.p2browser.Activator;
 import com.ifedorenko.p2browser.dialogs.RepositoryLocationDialog;
+import com.ifedorenko.p2browser.director.InstallableUnitDAG;
 import com.ifedorenko.p2browser.model.IGroupedInstallableUnits;
 import com.ifedorenko.p2browser.model.IncludedInstallableUnits;
+import com.ifedorenko.p2browser.model.InstallableUnitDependencyTree;
 import com.ifedorenko.p2browser.model.UngroupedInstallableUnits;
 
 @SuppressWarnings( "restriction" )
@@ -332,14 +334,17 @@ public class MetadataRepositoryView
                                     public void run( IProgressMonitor monitor )
                                         throws InvocationTargetException, InterruptedException
                                     {
+                                        InstallableUnitDAG dag;
                                         if ( groupIncludedIUs )
                                         {
-                                            content[0] = IncludedInstallableUnits.getInstallableUnits( repo, monitor );
+                                            dag = new IncludedInstallableUnits().toInstallableUnitDAG( repo, monitor );
                                         }
                                         else
                                         {
-                                            content[0] = UngroupedInstallableUnits.getInstallableUnits( repo, monitor );
+                                            dag = new UngroupedInstallableUnits().toInstallableUnitDAG( repo, monitor );
                                         }
+
+                                        content[0] = new InstallableUnitDependencyTree( dag );
                                     }
 
                                 } );

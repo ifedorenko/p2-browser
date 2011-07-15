@@ -12,9 +12,8 @@
 package com.ifedorenko.p2browser.director;
 
 import java.util.Collection;
-import java.util.HashSet;
-import java.util.LinkedHashSet;
-import java.util.Set;
+import java.util.LinkedHashMap;
+import java.util.Map;
 
 import org.eclipse.equinox.p2.metadata.IInstallableUnit;
 
@@ -22,9 +21,11 @@ public class InstallableUnitInfo
 {
     private final IInstallableUnit unit;
 
-    private final Set<InstallableUnitInfo> parents = new HashSet<InstallableUnitInfo>();
+    private final Map<IInstallableUnit, InstallableUnitInfo> parents =
+        new LinkedHashMap<IInstallableUnit, InstallableUnitInfo>();
 
-    private final Set<InstallableUnitInfo> children = new LinkedHashSet<InstallableUnitInfo>();
+    private final Map<IInstallableUnit, InstallableUnitInfo> children =
+        new LinkedHashMap<IInstallableUnit, InstallableUnitInfo>();
 
     public InstallableUnitInfo( IInstallableUnit unit )
     {
@@ -38,49 +39,21 @@ public class InstallableUnitInfo
 
     public Collection<InstallableUnitInfo> getParents()
     {
-        return parents;
+        return parents.values();
     }
 
     public void addParent( InstallableUnitInfo parent )
     {
-        parents.add( parent );
-    }
-
-    @Override
-    public int hashCode()
-    {
-        int hash = 17;
-        hash = hash * 31 + unit.hashCode();
-//        hash = hash * 31 + parents.hashCode();
-//        hash = hash * 31 + children.hashCode();
-        return hash;
-    }
-
-    @Override
-    public boolean equals( Object obj )
-    {
-        if ( this == obj )
-        {
-            return true;
-        }
-
-        if ( !( obj instanceof InstallableUnitInfo ) )
-        {
-            return false;
-        }
-
-        InstallableUnitInfo other = (InstallableUnitInfo) obj;
-
-        return unit.equals( other.unit ) && parents.equals( other.parents ) && children.equals( other.children );
+        parents.put( parent.getInstallableUnit(), parent );
     }
 
     public void addChild( InstallableUnitInfo child )
     {
-        children.add( child );
+        children.put( child.getInstallableUnit(), child );
     }
 
     public Collection<InstallableUnitInfo> getChildren()
     {
-        return children;
+        return children.values();
     }
 }

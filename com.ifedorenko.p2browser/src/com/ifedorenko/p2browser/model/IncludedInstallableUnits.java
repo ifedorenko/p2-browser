@@ -30,15 +30,14 @@ import org.eclipse.equinox.p2.metadata.VersionedId;
 import org.eclipse.equinox.p2.query.IQueryable;
 import org.eclipse.equinox.p2.query.QueryUtil;
 
+import com.ifedorenko.p2browser.director.InstallableUnitDAG;
 import com.ifedorenko.p2browser.director.InstallableUnitInfo;
 
 @SuppressWarnings( "restriction" )
 public class IncludedInstallableUnits
-    implements IGroupedInstallableUnits
 {
-    private final Map<IVersionedId, InstallableUnitInfo> nodes;
 
-    public IncludedInstallableUnits( Iterator<IInstallableUnit> iter )
+    public InstallableUnitDAG toInstallableUnitDAG( Iterator<IInstallableUnit> iter )
     {
         Map<IVersionedId, InstallableUnitInfo> nodes = new LinkedHashMap<IVersionedId, InstallableUnitInfo>();
 
@@ -53,45 +52,34 @@ public class IncludedInstallableUnits
             for ( InstallableUnitInfo otherNode : getIncludedInstallableUnit( nodes, node.getInstallableUnit() ) )
             {
                 otherNode.addParent( node );
+                node.addChild( otherNode );
             }
         }
 
-        this.nodes = nodes;
+        IInstallableUnit[] rootIUs = toArray( getRootIncludedInstallableUnits( nodes ) );
+        Map<IInstallableUnit, InstallableUnitInfo> units = new LinkedHashMap<IInstallableUnit, InstallableUnitInfo>();
+        for ( InstallableUnitInfo info : nodes.values() )
+        {
+            units.put( info.getInstallableUnit(), info );
+        }
+        return new InstallableUnitDAG( rootIUs, units );
     }
 
-    public static IncludedInstallableUnits getInstallableUnits( IQueryable<IInstallableUnit> queryable,
-                                                                        IProgressMonitor monitor )
+    public InstallableUnitDAG toInstallableUnitDAG( IQueryable<IInstallableUnit> queryable, IProgressMonitor monitor )
     {
         Iterator<IInstallableUnit> iter = queryable.query( QueryUtil.ALL_UNITS, monitor ).iterator();
-        return new IncludedInstallableUnits( iter );
+        return toInstallableUnitDAG( iter );
     }
 
-    @Override
-    public int size()
-    {
-        return nodes.size();
-    }
-
-    @Override
-    public Collection<IInstallableUnit> getInstallableUnits()
-    {
-        return toInstallableUnits( nodes.values() );
-    }
-
-    @Override
-    public Collection<IInstallableUnit> getIncludedInstallableUnits( IInstallableUnit parent, boolean transitive )
+    public Collection<IInstallableUnit> getIncludedInstallableUnits( Map<IVersionedId, InstallableUnitInfo> nodes,
+                                                                     IInstallableUnit parent )
     {
         Collection<InstallableUnitInfo> included = getIncludedInstallableUnit( nodes, parent );
-        if ( !transitive )
-        {
-            return toInstallableUnits( included );
-        }
 
-        return getIncludedInstallableUnits( included, new LinkedHashSet<IInstallableUnit>() );
+        return getIncludedInstallableUnits( nodes, included, new LinkedHashSet<IInstallableUnit>() );
     }
 
-    @Override
-    public Collection<IInstallableUnit> getRootIncludedInstallableUnits()
+    public Collection<IInstallableUnit> getRootIncludedInstallableUnits( Map<IVersionedId, InstallableUnitInfo> nodes )
     {
         List<IInstallableUnit> roots = new ArrayList<IInstallableUnit>();
 
@@ -106,14 +94,16 @@ public class IncludedInstallableUnits
         return roots;
     }
 
-    private Collection<IInstallableUnit> getIncludedInstallableUnits( Collection<InstallableUnitInfo> included,
+    private Collection<IInstallableUnit> getIncludedInstallableUnits( Map<IVersionedId, InstallableUnitInfo> nodes,
+                                                                      Collection<InstallableUnitInfo> included,
                                                                       Set<IInstallableUnit> result )
     {
         for ( InstallableUnitInfo unit : included )
         {
             if ( result.add( unit.getInstallableUnit() ) )
             {
-                getIncludedInstallableUnits( getIncludedInstallableUnit( nodes, unit.getInstallableUnit() ), result );
+                getIncludedInstallableUnits( nodes, getIncludedInstallableUnit( nodes, unit.getInstallableUnit() ),
+                                             result );
             }
         }
         return result;
@@ -145,14 +135,9 @@ public class IncludedInstallableUnits
         return result;
     }
 
-    private Collection<IInstallableUnit> toInstallableUnits( Collection<InstallableUnitInfo> nodes )
+    private static IInstallableUnit[] toArray( Collection<IInstallableUnit> units )
     {
-        ArrayList<IInstallableUnit> result = new ArrayList<IInstallableUnit>();
-        for ( InstallableUnitInfo node : nodes )
-        {
-            result.add( node.getInstallableUnit() );
-        }
-        return result;
+        return units.toArray( new IInstallableUnit[units.size()] );
     }
 
     private static boolean isSingleVersion( VersionRange range )
