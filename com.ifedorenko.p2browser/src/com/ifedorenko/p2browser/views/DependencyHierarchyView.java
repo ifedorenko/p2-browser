@@ -51,9 +51,10 @@ import org.eclipse.swt.widgets.Table;
 import org.eclipse.swt.widgets.Tree;
 import org.eclipse.ui.part.ViewPart;
 
-import com.ifedorenko.p2browser.director.DependencyMesh;
+import com.ifedorenko.p2browser.director.DependencyDAG;
 import com.ifedorenko.p2browser.model.IGroupedInstallableUnits;
 import com.ifedorenko.p2browser.model.InstallableUnitDependencyTree;
+import com.ifedorenko.p2browser.model.match.IInstallableUnitMatcher;
 
 import copied.org.eclipse.equinox.internal.p2.director.PermissiveSlicer;
 
@@ -89,7 +90,7 @@ public class DependencyHierarchyView
 
             InstallableUnitNode node = (InstallableUnitNode) element;
 
-            return node.match( new InstallableUnitMatcher()
+            return node.match( new IInstallableUnitMatcher()
             {
                 @Override
                 public boolean match( IInstallableUnit unit )
@@ -151,7 +152,7 @@ public class DependencyHierarchyView
             @Override
             public Object[] getElements( Object inputElement )
             {
-                if (inputElement instanceof IGroupedInstallableUnits)
+                if ( inputElement instanceof IGroupedInstallableUnits )
                 {
                     IGroupedInstallableUnits metadata = (IGroupedInstallableUnits) inputElement;
                     return toViewNodes( metadata, metadata.getRootIncludedInstallableUnits() );
@@ -276,7 +277,7 @@ public class DependencyHierarchyView
 
         Map<String, String> context = Collections.<String, String> emptyMap();
         PermissiveSlicer slicer = new PermissiveSlicer( allIUs, context, true, false, true, false, false );
-        DependencyMesh mesh = slicer.slice( toArray( rootIUs ), monitor );
+        DependencyDAG mesh = slicer.slice( toArray( rootIUs ), monitor );
 
         // TODO is it okay to use permissive slicer here?
 
@@ -287,7 +288,7 @@ public class DependencyHierarchyView
         IQueryable<IInstallableUnit> installedIUs = new QueryableArray( new IInstallableUnit[0] );
         projector.encode( entryPointIU, alreadyExistingRoots, installedIUs, rootIUs, monitor );
         projector.invokeSolver( monitor );
-        Collection<IInstallableUnit> resolved = projector.extractSolution();
+        final Collection<IInstallableUnit> resolved = projector.extractSolution();
 
         if ( resolved == null )
         {
@@ -296,7 +297,14 @@ public class DependencyHierarchyView
         }
 
         InstallableUnitDependencyTree dependencyTree =
-            new InstallableUnitDependencyTree( mesh.filterResolved( resolved ) );
+            new InstallableUnitDependencyTree( mesh.filter( new IInstallableUnitMatcher()
+            {
+                @Override
+                public boolean match( IInstallableUnit unit )
+                {
+                    return resolved.contains( unit );
+                }
+            } ) );
 
         hierarchyTreeViewer.setInput( dependencyTree );
         hierarchyTreeViewer.refresh();

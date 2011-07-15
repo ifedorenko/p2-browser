@@ -23,15 +23,16 @@ import org.eclipse.equinox.internal.p2.director.QueryableArray;
 import org.eclipse.equinox.p2.metadata.IInstallableUnit;
 import org.eclipse.equinox.p2.query.IQueryable;
 
+import com.ifedorenko.p2browser.model.match.IInstallableUnitMatcher;
 
 @SuppressWarnings( "restriction" )
-public class DependencyMesh
+public class DependencyDAG
 {
     private final IInstallableUnit[] rootIUs;
 
     private final Map<IInstallableUnit, InstallableUnitInfo> units;
 
-    public DependencyMesh( IInstallableUnit[] rootIUs, Map<IInstallableUnit, InstallableUnitInfo> units )
+    public DependencyDAG( IInstallableUnit[] rootIUs, Map<IInstallableUnit, InstallableUnitInfo> units )
     {
         this.rootIUs = rootIUs;
         this.units = Collections.unmodifiableMap( new LinkedHashMap<IInstallableUnit, InstallableUnitInfo>( units ) );
@@ -55,14 +56,14 @@ public class DependencyMesh
         return new QueryableArray( set.toArray( new IInstallableUnit[set.size()] ) );
     }
 
-    public DependencyMesh filterResolved( Collection<IInstallableUnit> resolved )
+    public DependencyDAG filter( IInstallableUnitMatcher matcher )
     {
         Map<IInstallableUnit, InstallableUnitInfo> filtered =
             new LinkedHashMap<IInstallableUnit, InstallableUnitInfo>();
 
         for ( Map.Entry<IInstallableUnit, InstallableUnitInfo> entry : units.entrySet() )
         {
-            if ( resolved.contains( entry.getKey() ) )
+            if ( matcher.match( entry.getKey() ) )
             {
                 filtered.put( entry.getKey(), new InstallableUnitInfo( entry.getValue().getInstallableUnit() ) );
             }
@@ -91,7 +92,7 @@ public class DependencyMesh
             }
         }
 
-        return new DependencyMesh( rootIUs, filtered );
+        return new DependencyDAG( rootIUs, filtered );
     }
 
     public InstallableUnitInfo getInstallableUnit( IInstallableUnit unit )

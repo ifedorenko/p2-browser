@@ -9,22 +9,11 @@
  *      Igor Fedorenko - initial API and implementation
  *******************************************************************************/
 
-package com.ifedorenko.p2browser.views;
+package com.ifedorenko.p2browser.model.match;
 
-abstract class AbstractPatternMatcher
-    implements InstallableUnitMatcher
+import org.eclipse.equinox.p2.metadata.IInstallableUnit;
+
+public interface IInstallableUnitMatcher
 {
-
-    private final String pattern;
-
-    protected AbstractPatternMatcher( String pattern )
-    {
-        this.pattern = pattern;
-
-    }
-
-    protected boolean match( String string )
-    {
-        return string != null && string.contains( pattern );
-    }
+    public boolean match( IInstallableUnit unit );
 }

@@ -94,6 +94,7 @@ public class RepositoryLocationDialog
     {
         super.create();
 
+        combo.add( "file:///var/tmp/p2/indigo" );
         combo.add( "http://download.eclipse.org/releases/indigo" );
         combo.add( "http://download.eclipse.org/releases/helios" );
         combo.add( "http://download.eclipse.org/releases/galileo" );

@@ -18,6 +18,7 @@ import java.util.List;
 import org.eclipse.equinox.p2.metadata.IInstallableUnit;
 
 import com.ifedorenko.p2browser.model.IGroupedInstallableUnits;
+import com.ifedorenko.p2browser.model.match.IInstallableUnitMatcher;
 
 class InstallableUnitNode
 {
@@ -54,7 +55,7 @@ class InstallableUnitNode
         return result;
     }
 
-    public boolean match( InstallableUnitMatcher matcher )
+    public boolean match( IInstallableUnitMatcher matcher )
     {
         if ( matcher.match( unit ) )
         {

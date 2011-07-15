@@ -19,36 +19,36 @@ import java.util.Set;
 
 import org.eclipse.equinox.p2.metadata.IInstallableUnit;
 
-import com.ifedorenko.p2browser.director.DependencyMesh;
+import com.ifedorenko.p2browser.director.DependencyDAG;
 import com.ifedorenko.p2browser.director.InstallableUnitInfo;
 
 public class InstallableUnitDependencyTree
     implements IGroupedInstallableUnits
 {
 
-    private final DependencyMesh dependencyTree;
+    private final DependencyDAG dependencyDAG;
 
-    public InstallableUnitDependencyTree( DependencyMesh dependencyTree )
+    public InstallableUnitDependencyTree( DependencyDAG dependencyTree )
     {
-        this.dependencyTree = dependencyTree;
+        this.dependencyDAG = dependencyTree;
     }
 
     @Override
     public int size()
     {
-        return dependencyTree.getInstallableUnits().size();
+        return dependencyDAG.getInstallableUnits().size();
     }
 
     @Override
     public Collection<IInstallableUnit> getInstallableUnits()
     {
-        return toInstallableUnits( dependencyTree.getInstallableUnits() );
+        return toInstallableUnits( dependencyDAG.getInstallableUnits() );
     }
 
     @Override
     public Collection<IInstallableUnit> getIncludedInstallableUnits( IInstallableUnit unit, boolean transitive )
     {
-        InstallableUnitInfo parent = dependencyTree.getInstallableUnit( unit );
+        InstallableUnitInfo parent = dependencyDAG.getInstallableUnit( unit );
 
         Collection<InstallableUnitInfo> children = parent.getChildren();
 
@@ -68,7 +68,7 @@ public class InstallableUnitDependencyTree
             IInstallableUnit iu = child.getInstallableUnit();
             if ( result.add( iu ) )
             {
-                addIncludedInstallableUnits( dependencyTree.getInstallableUnit( iu ).getChildren(), result );
+                addIncludedInstallableUnits( dependencyDAG.getInstallableUnit( iu ).getChildren(), result );
             }
         }
         return result;
@@ -87,6 +87,6 @@ public class InstallableUnitDependencyTree
     @Override
     public Collection<IInstallableUnit> getRootIncludedInstallableUnits()
     {
-        return toInstallableUnits( dependencyTree.getRootInstallableUnits() );
+        return toInstallableUnits( dependencyDAG.getRootInstallableUnits() );
     }
 }

@@ -14,6 +14,9 @@ package com.ifedorenko.p2browser.views;
 import org.eclipse.jface.viewers.Viewer;
 import org.eclipse.jface.viewers.ViewerFilter;
 
+import com.ifedorenko.p2browser.model.match.InstallableUnitIDMatcher;
+import com.ifedorenko.p2browser.model.match.ProvidedCapabilityMatcher;
+
 class InstallableUnitFilter
     extends ViewerFilter
 {

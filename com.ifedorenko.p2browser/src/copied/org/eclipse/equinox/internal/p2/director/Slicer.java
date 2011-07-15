@@ -26,7 +26,7 @@ import org.eclipse.equinox.p2.metadata.expression.IMatchExpression;
 import org.eclipse.equinox.p2.query.*;
 import org.eclipse.osgi.util.NLS;
 
-import com.ifedorenko.p2browser.director.DependencyMesh;
+import com.ifedorenko.p2browser.director.DependencyDAG;
 import com.ifedorenko.p2browser.director.InstallableUnitInfo;
 
 @SuppressWarnings( "restriction" )
@@ -54,7 +54,7 @@ public class Slicer {
 		result = new MultiStatus(DirectorActivator.PI_DIRECTOR, IStatus.OK, Messages.Planner_Problems_resolving_plan, null);
 	}
 
-	public DependencyMesh slice(IInstallableUnit[] ius, IProgressMonitor monitor) {
+	public DependencyDAG slice(IInstallableUnit[] ius, IProgressMonitor monitor) {
 		try {
 			long start = 0;
 			if (DEBUG) {
@@ -87,7 +87,7 @@ public class Slicer {
 			LogHelper.log(result);
 		if (result.getSeverity() == IStatus.ERROR)
 			return null;
-		return new DependencyMesh(ius, considered);
+		return new DependencyDAG(ius, considered);
 	}
 
 	private void computeNonGreedyIUs() {

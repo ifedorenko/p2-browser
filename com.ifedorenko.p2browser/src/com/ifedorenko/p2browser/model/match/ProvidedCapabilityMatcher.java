@@ -9,14 +9,15 @@
  *      Igor Fedorenko - initial API and implementation
  *******************************************************************************/
 
-package com.ifedorenko.p2browser.views;
+package com.ifedorenko.p2browser.model.match;
 
 import org.eclipse.equinox.p2.metadata.IInstallableUnit;
 import org.eclipse.equinox.p2.metadata.IProvidedCapability;
 
-class ProvidedCapabilityMatcher
+
+public class ProvidedCapabilityMatcher
     extends AbstractPatternMatcher
-    implements InstallableUnitMatcher
+    implements IInstallableUnitMatcher
 {
     public ProvidedCapabilityMatcher( String pattern )
     {
