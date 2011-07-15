@@ -283,7 +283,6 @@ public class MetadataRepositoryView
         {
             treeViewer = new TreeViewer( container, SWT.BORDER | SWT.MULTI );
             treeViewer.setUseHashlookup( true );
-            treeViewer.setSorter( new InstallableUnitSorter() );
             treeViewer.addFilter( filter );
             Tree tree = treeViewer.getTree();
             tree.setLayoutData( new GridData( SWT.FILL, SWT.FILL, true, true, 1, 1 ) );
@@ -343,6 +342,8 @@ public class MetadataRepositoryView
                                         {
                                             dag = new UngroupedInstallableUnits().toInstallableUnitDAG( repo, monitor );
                                         }
+
+                                        dag = dag.sort( new InstallableUnitSorter() );
 
                                         content[0] = new InstallableUnitDependencyTree( dag );
                                     }

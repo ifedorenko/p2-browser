@@ -12,8 +12,10 @@
 package com.ifedorenko.p2browser.director;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -93,6 +95,44 @@ public class InstallableUnitDAG
         }
 
         return new InstallableUnitDAG( rootIUs, filtered );
+    }
+
+    public InstallableUnitDAG sort( final Comparator<IInstallableUnit> comparator )
+    {
+        IInstallableUnit[] rootIUs = new IInstallableUnit[this.rootIUs.length];
+        System.arraycopy( this.rootIUs, 0, rootIUs, 0, this.rootIUs.length );
+        Arrays.sort( rootIUs, comparator );
+
+        Map<IInstallableUnit, InstallableUnitInfo> sorted = new LinkedHashMap<IInstallableUnit, InstallableUnitInfo>();
+
+        for ( Map.Entry<IInstallableUnit, InstallableUnitInfo> entry : this.units.entrySet() )
+        {
+            InstallableUnitInfo info = new InstallableUnitInfo( entry.getKey() );
+
+            List<InstallableUnitInfo> children = new ArrayList<InstallableUnitInfo>( entry.getValue().getChildren() );
+            Collections.sort( children, new Comparator<InstallableUnitInfo>()
+            {
+                @Override
+                public int compare( InstallableUnitInfo a, InstallableUnitInfo b )
+                {
+                    return comparator.compare( a.getInstallableUnit(), b.getInstallableUnit() );
+                }
+            } );
+
+            for ( InstallableUnitInfo child : children )
+            {
+                info.addChild( child );
+            }
+
+            for ( InstallableUnitInfo parent : entry.getValue().getParents() )
+            {
+                info.addParent( parent );
+            }
+
+            sorted.put( info.getInstallableUnit(), info );
+        }
+
+        return new InstallableUnitDAG( rootIUs, sorted );
     }
 
     public InstallableUnitInfo getInstallableUnit( IInstallableUnit unit )
