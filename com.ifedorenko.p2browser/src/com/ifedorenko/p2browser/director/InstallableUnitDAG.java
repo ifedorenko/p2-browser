@@ -17,6 +17,7 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.LinkedHashMap;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -94,7 +95,16 @@ public class InstallableUnitDAG
             }
         }
 
-        return new InstallableUnitDAG( rootIUs, filtered );
+        Collection<IInstallableUnit> rootIUs = new LinkedHashSet<IInstallableUnit>();
+        for ( InstallableUnitInfo info : filtered.values() )
+        {
+            if ( info.getParents().isEmpty() )
+            {
+                rootIUs.add( info.getInstallableUnit() );
+            }
+        }
+
+        return new InstallableUnitDAG( rootIUs.toArray( new IInstallableUnit[rootIUs.size()] ), filtered );
     }
 
     public InstallableUnitDAG sort( final Comparator<IInstallableUnit> comparator )

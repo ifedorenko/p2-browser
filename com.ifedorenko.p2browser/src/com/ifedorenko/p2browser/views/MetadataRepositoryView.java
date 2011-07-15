@@ -67,6 +67,9 @@ import com.ifedorenko.p2browser.model.IGroupedInstallableUnits;
 import com.ifedorenko.p2browser.model.IncludedInstallableUnits;
 import com.ifedorenko.p2browser.model.InstallableUnitDependencyTree;
 import com.ifedorenko.p2browser.model.UngroupedInstallableUnits;
+import com.ifedorenko.p2browser.model.match.IInstallableUnitMatcher;
+import com.ifedorenko.p2browser.model.match.InstallableUnitIDMatcher;
+import com.ifedorenko.p2browser.model.match.ProvidedCapabilityMatcher;
 
 @SuppressWarnings( "restriction" )
 public class MetadataRepositoryView
@@ -97,13 +100,14 @@ public class MetadataRepositoryView
 
     private Text filterText;
 
-    private final InstallableUnitFilter filter = new InstallableUnitFilter();
+    private IInstallableUnitMatcher unitMatcher;
 
     private Job refreshTreeJob = new Job( "Refresh" )
     {
         @Override
         protected IStatus run( IProgressMonitor monitor )
         {
+            repositoryContent.clear();
             refreshTreeInDisplayThread();
 
             return Status.OK_STATUS;
@@ -143,19 +147,24 @@ public class MetadataRepositoryView
             {
                 public void modifyText( ModifyEvent e )
                 {
-                    InstallableUnitFilter.FilterMode mode = InstallableUnitFilter.FilterMode.iu;
-                    switch ( filterType.getSelectionIndex() )
-                    {
-                        case 1:
-                            mode = InstallableUnitFilter.FilterMode.capability;
-                            break;
-                        case 0:
-                        default:
-                            mode = InstallableUnitFilter.FilterMode.iu;
-                            break;
-                    }
                     String pattern = trim( filterText.getText() );
-                    filter.setFilter( mode, pattern );
+                    if ( pattern != null )
+                    {
+                        switch ( filterType.getSelectionIndex() )
+                        {
+                            case 1:
+                                unitMatcher = new ProvidedCapabilityMatcher( pattern );
+                                break;
+                            case 0:
+                            default:
+                                unitMatcher = new InstallableUnitIDMatcher( pattern );
+                                break;
+                        }
+                    }
+                    else
+                    {
+                        unitMatcher = null;
+                    }
                     refreshTreeJob.schedule( 500L );
                 }
             };
@@ -283,7 +292,6 @@ public class MetadataRepositoryView
         {
             treeViewer = new TreeViewer( container, SWT.BORDER | SWT.MULTI );
             treeViewer.setUseHashlookup( true );
-            treeViewer.addFilter( filter );
             Tree tree = treeViewer.getTree();
             tree.setLayoutData( new GridData( SWT.FILL, SWT.FILL, true, true, 1, 1 ) );
             tree.setLinesVisible( true );
@@ -341,6 +349,11 @@ public class MetadataRepositoryView
                                         else
                                         {
                                             dag = new UngroupedInstallableUnits().toInstallableUnitDAG( repo, monitor );
+                                        }
+
+                                        if ( unitMatcher != null )
+                                        {
+                                            dag = dag.filter( unitMatcher );
                                         }
 
                                         dag = dag.sort( new InstallableUnitSorter() );
