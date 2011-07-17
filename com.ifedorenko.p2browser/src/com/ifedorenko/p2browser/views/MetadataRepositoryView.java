@@ -12,10 +12,10 @@
 package com.ifedorenko.p2browser.views;
 
 import java.io.File;
-import java.lang.reflect.InvocationTargetException;
 import java.net.URI;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
@@ -25,7 +25,6 @@ import java.util.Set;
 
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
-import org.eclipse.core.runtime.MultiStatus;
 import org.eclipse.core.runtime.OperationCanceledException;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
@@ -37,9 +36,7 @@ import org.eclipse.equinox.p2.query.QueryUtil;
 import org.eclipse.equinox.p2.repository.IRepository;
 import org.eclipse.equinox.p2.repository.metadata.IMetadataRepository;
 import org.eclipse.equinox.p2.repository.metadata.IMetadataRepositoryManager;
-import org.eclipse.jface.dialogs.ErrorDialog;
 import org.eclipse.jface.dialogs.IDialogConstants;
-import org.eclipse.jface.operation.IRunnableWithProgress;
 import org.eclipse.jface.viewers.TreeViewer;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.ModifyEvent;
@@ -81,16 +78,18 @@ public class MetadataRepositoryView
     private final FormToolkit toolkit = new FormToolkit( Display.getCurrent() );
 
     /**
-     * Root repositories explicitly added by the user
+     * Root repository URIs explicitly added by the user
      */
-    private Map<URI, IMetadataRepository> repositories = new LinkedHashMap<URI, IMetadataRepository>();
+    private final Set<URI> repositories = Collections.synchronizedSet( new LinkedHashSet<URI>() );
 
     /**
      * All repositories, including children of composite repositories
      */
-    private Map<URI, IMetadataRepository> allrepositories = new LinkedHashMap<URI, IMetadataRepository>();
+    private final Map<URI, IMetadataRepository> allrepositories =
+        Collections.synchronizedMap( new LinkedHashMap<URI, IMetadataRepository>() );
 
-    private Map<URI, IGroupedInstallableUnits> repositoryContent = new HashMap<URI, IGroupedInstallableUnits>();
+    private final Map<URI, IGroupedInstallableUnits> repositoryContent =
+        Collections.synchronizedMap( new HashMap<URI, IGroupedInstallableUnits>() );
 
     private boolean revealCompositeRepositories = true;
 
@@ -108,6 +107,11 @@ public class MetadataRepositoryView
         protected IStatus run( IProgressMonitor monitor )
         {
             repositoryContent.clear();
+            for ( URI location : repositories )
+            {
+                loadRepositoryContent( repositoryContent, location, monitor );
+            }
+
             refreshTreeInDisplayThread();
 
             return Status.OK_STATUS;
@@ -261,7 +265,7 @@ public class MetadataRepositoryView
                     public void widgetSelected( SelectionEvent e )
                     {
                         groupIncludedIUs = btnGroupInlcuded.getSelection();
-                        refreshTree();
+                        refreshTreeJob.schedule( 500L );
                     }
                 } );
                 btnGroupInlcuded.setSelection( groupIncludedIUs );
@@ -280,7 +284,7 @@ public class MetadataRepositoryView
                     public void widgetSelected( SelectionEvent e )
                     {
                         revealCompositeRepositories = btnChildRepositories.getSelection();
-                        refreshTree();
+                        refreshTreeJob.schedule( 500L );
                     }
                 } );
                 btnChildRepositories.setSelection( revealCompositeRepositories );
@@ -311,9 +315,9 @@ public class MetadataRepositoryView
                 @Override
                 protected Object[] getChildren( Object parentElement )
                 {
-                    if ( parentElement instanceof Map<?, ?> )
+                    if ( parentElement == repositories )
                     {
-                        return ( (Map<?, ?>) parentElement ).values().toArray();
+                        return toMetadataRepositories( repositories ).toArray();
                     }
                     else if ( revealCompositeRepositories && parentElement instanceof CompositeMetadataRepository )
                     {
@@ -322,53 +326,9 @@ public class MetadataRepositoryView
                     else if ( parentElement instanceof IMetadataRepository )
                     {
                         final IMetadataRepository repo = (IMetadataRepository) parentElement;
-                        final IGroupedInstallableUnits[] content =
-                            new IGroupedInstallableUnits[] { repositoryContent.get( repo.getLocation() ) };
-                        if ( content[0] == null )
-                        {
-                            try
-                            {
-                                getSite().getWorkbenchWindow().run( true, true, new IRunnableWithProgress()
-                                {
-                                    @Override
-                                    public void run( IProgressMonitor monitor )
-                                        throws InvocationTargetException, InterruptedException
-                                    {
-                                        InstallableUnitDAG dag;
-                                        if ( groupIncludedIUs )
-                                        {
-                                            dag = new IncludedInstallableUnits().toInstallableUnitDAG( repo, monitor );
-                                        }
-                                        else
-                                        {
-                                            dag = new UngroupedInstallableUnits().toInstallableUnitDAG( repo, monitor );
-                                        }
+                        final IGroupedInstallableUnits content = repositoryContent.get( repo.getLocation() );
 
-                                        if ( unitMatcher != null )
-                                        {
-                                            dag = dag.filter( unitMatcher );
-                                        }
-
-                                        dag = dag.sort( new InstallableUnitSorter() );
-
-                                        content[0] = new InstallableUnitDependencyTree( dag );
-                                    }
-
-                                } );
-                                repositoryContent.put( repo.getLocation(), content[0] );
-                            }
-                            catch ( InvocationTargetException e )
-                            {
-                                handleException( "Could not load repository metadata", e );
-                                return new Object[0];
-                            }
-                            catch ( InterruptedException e )
-                            {
-                                return new Object[0];
-                            }
-
-                        }
-                        return toViewNodes( content[0], content[0].getRootIncludedInstallableUnits() );
+                        return toViewNodes( content, content.getRootIncludedInstallableUnits() );
                     }
                     return super.getChildren( parentElement );
                 }
@@ -383,7 +343,7 @@ public class MetadataRepositoryView
             @Override
             protected IQueryable<IInstallableUnit> getAllInstallableUnits()
             {
-                return toQueryable( repositories.values() );
+                return toQueryable( toMetadataRepositories( repositories ) );
             }
         };
     }
@@ -392,7 +352,8 @@ public class MetadataRepositoryView
     {
         DirectoryDialog fd = new DirectoryDialog( getViewSite().getShell() );
         final String path = fd.open();
-        final List<IMetadataRepository> repositories = new ArrayList<IMetadataRepository>( this.repositories.values() );
+        final List<IMetadataRepository> repositories =
+            new ArrayList<IMetadataRepository>( toMetadataRepositories( this.repositories ) );
         Job job = new Job( "Saving repository" )
         {
             @Override
@@ -435,37 +396,31 @@ public class MetadataRepositoryView
 
     protected void reloadAllRepositories()
     {
-        Job job = new Job( "Load repository metadata" )
+        Job job = new Job( "Reload repository metadata" )
         {
             @Override
             protected IStatus run( IProgressMonitor monitor )
             {
                 try
                 {
-                    final Map<URI, IMetadataRepository> repositories = new LinkedHashMap<URI, IMetadataRepository>();
-
                     final Map<URI, IMetadataRepository> allrepositories = new LinkedHashMap<URI, IMetadataRepository>();
+
+                    final Map<URI, IGroupedInstallableUnits> repositoryContent =
+                        new LinkedHashMap<URI, IGroupedInstallableUnits>();
 
                     IMetadataRepositoryManager repoMgr = Activator.getRepositoryManager();
 
-                    for ( URI location : MetadataRepositoryView.this.repositories.keySet() )
+                    for ( URI location : MetadataRepositoryView.this.repositories )
                     {
-                        IMetadataRepository repository = repoMgr.refreshRepository( location, monitor );
-
-                        if ( repository != null )
-                        {
-                            repositories.put( location, repository );
-                            allrepositories.put( location, repository );
-                        }
+                        loadRepository( repoMgr, allrepositories, location, true, monitor );
+                        loadRepositoryContent( repositoryContent, location, monitor );
                     }
-
-                    MetadataRepositoryView.this.repositories.clear();
-                    MetadataRepositoryView.this.repositories.putAll( repositories );
 
                     MetadataRepositoryView.this.allrepositories.clear();
                     MetadataRepositoryView.this.allrepositories.putAll( allrepositories );
 
                     MetadataRepositoryView.this.repositoryContent.clear();
+                    MetadataRepositoryView.this.repositoryContent.putAll( repositoryContent );
 
                     refreshTreeInDisplayThread();
 
@@ -490,6 +445,18 @@ public class MetadataRepositoryView
         return QueryUtil.compoundQueryable( repositories );
     }
 
+    protected Collection<IMetadataRepository> toMetadataRepositories( Collection<URI> locations )
+    {
+        List<IMetadataRepository> result = new ArrayList<IMetadataRepository>();
+
+        for ( URI location : locations )
+        {
+            result.add( allrepositories.get( location ) );
+        }
+
+        return result;
+    }
+
     protected void addRepository( final URI location )
     {
         Job job = new Job( "Load repository metadata" )
@@ -501,16 +468,13 @@ public class MetadataRepositoryView
                 {
                     IMetadataRepositoryManager repoMgr = Activator.getRepositoryManager();
 
-                    IMetadataRepository repository = repoMgr.loadRepository( location, monitor );
+                    repositories.add( location );
 
-                    if ( repository != null )
-                    {
-                        repositories.put( location, repository );
-                        allrepositories.put( location, repository );
-                        repositoryContent.remove( location );
+                    loadRepository( repoMgr, allrepositories, location, false, monitor );
 
-                        refreshTreeInDisplayThread();
-                    }
+                    loadRepositoryContent( repositoryContent, location, monitor );
+
+                    refreshTreeInDisplayThread();
 
                     return Status.OK_STATUS;
                 }
@@ -528,16 +492,9 @@ public class MetadataRepositoryView
         job.schedule();
     }
 
-    private void handleException( String title, InvocationTargetException e )
+    protected Object[] getImmediateChildrenRepositories( final CompositeMetadataRepository repository )
     {
-        String message = e.getMessage();
-        new ErrorDialog( getSite().getShell(), title, message, null, IStatus.ERROR ).open();
-    }
-
-    protected Object[] getImmediateChildrenRepositories( CompositeMetadataRepository repository )
-    {
-        List<IMetadataRepository> result = new ArrayList<IMetadataRepository>();
-        final List<URI> missing = new ArrayList<URI>();
+        List<Object> result = new ArrayList<Object>();
 
         for ( URI childUri : repository.getChildren() )
         {
@@ -548,57 +505,8 @@ public class MetadataRepositoryView
             }
             else
             {
-                missing.add( childUri );
+                result.add( "Missing " + childUri );
             }
-        }
-
-        if ( !missing.isEmpty() )
-        {
-            Job job = new Job( "Load child repository metadata" )
-            {
-                @Override
-                protected IStatus run( IProgressMonitor monitor )
-                {
-                    IMetadataRepositoryManager repoMgr = Activator.getRepositoryManager();
-
-                    List<IStatus> errors = new ArrayList<IStatus>();
-
-                    for ( URI location : missing )
-                    {
-                        try
-                        {
-                            IMetadataRepository repository = repoMgr.loadRepository( location, monitor );
-
-                            allrepositories.put( location, repository );
-                        }
-                        catch ( ProvisionException e )
-                        {
-                            errors.add( e.getStatus() );
-                        }
-                        catch ( OperationCanceledException e )
-                        {
-                            return Status.CANCEL_STATUS;
-                        }
-                    }
-
-                    refreshTreeInDisplayThread();
-
-                    if ( !errors.isEmpty() )
-                    {
-                        MultiStatus status =
-                            new MultiStatus( Activator.PLUGIN_ID, -1, "Could not load child repository metadata", null );
-                        for ( IStatus error : errors )
-                        {
-                            status.add( error );
-                        }
-                        return status;
-                    }
-
-                    return Status.OK_STATUS;
-                }
-            };
-            job.setUser( true );
-            job.schedule();
         }
 
         return result.toArray();
@@ -623,16 +531,72 @@ public class MetadataRepositoryView
             @Override
             public void run()
             {
-                refreshTree();
+                treeViewer.getTree().setItemCount( repositories.size() );
+                treeViewer.refresh();
             }
         } );
     }
 
-    protected void refreshTree()
+    private void loadRepository( IMetadataRepositoryManager repoMgr, Map<URI, IMetadataRepository> allrepositories,
+                                 URI location, boolean refresh, IProgressMonitor monitor )
+        throws ProvisionException, OperationCanceledException
     {
-        treeViewer.setInput( repositories );
-        treeViewer.getTree().setItemCount( repositories.size() );
-        treeViewer.refresh();
+        if ( !allrepositories.containsKey( location ) )
+        {
+            IMetadataRepository repository;
+            if ( refresh )
+            {
+                repository = repoMgr.refreshRepository( location, monitor );
+            }
+            else
+            {
+                repository = repoMgr.loadRepository( location, monitor );
+            }
+            allrepositories.put( location, repository );
+
+            if ( repository instanceof CompositeMetadataRepository )
+            {
+                for ( URI childUri : ( (CompositeMetadataRepository) repository ).getChildren() )
+                {
+                    // composite repository refresh refreshes all child repositories. do not re-refresh children here
+                    loadRepository( repoMgr, allrepositories, childUri, false, monitor );
+                }
+            }
+        }
+    }
+
+    private void loadRepositoryContent( Map<URI, IGroupedInstallableUnits> repositoryContent, URI location,
+                                        IProgressMonitor monitor )
+    {
+        IMetadataRepository repository = allrepositories.get( location );
+        if ( revealCompositeRepositories && repository instanceof CompositeMetadataRepository )
+        {
+            for ( URI childUri : ( (CompositeMetadataRepository) repository ).getChildren() )
+            {
+                loadRepositoryContent( repositoryContent, childUri, monitor );
+            }
+        }
+        else
+        {
+            InstallableUnitDAG dag;
+            if ( groupIncludedIUs )
+            {
+                dag = new IncludedInstallableUnits().toInstallableUnitDAG( repository, monitor );
+            }
+            else
+            {
+                dag = new UngroupedInstallableUnits().toInstallableUnitDAG( repository, monitor );
+            }
+
+            if ( unitMatcher != null )
+            {
+                dag = dag.filter( unitMatcher );
+            }
+
+            dag = dag.sort( new InstallableUnitSorter() );
+
+            repositoryContent.put( location, new InstallableUnitDependencyTree( dag ) );
+        }
     }
 
     private static String trim( String str )
