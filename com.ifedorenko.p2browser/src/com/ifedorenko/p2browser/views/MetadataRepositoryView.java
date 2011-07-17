@@ -261,8 +261,7 @@ public class MetadataRepositoryView
                     public void widgetSelected( SelectionEvent e )
                     {
                         groupIncludedIUs = btnGroupInlcuded.getSelection();
-                        repositoryContent.clear();
-                        treeViewer.refresh();
+                        refreshTree();
                     }
                 } );
                 btnGroupInlcuded.setSelection( groupIncludedIUs );
@@ -281,7 +280,7 @@ public class MetadataRepositoryView
                     public void widgetSelected( SelectionEvent e )
                     {
                         revealCompositeRepositories = btnChildRepositories.getSelection();
-                        treeViewer.refresh();
+                        refreshTree();
                     }
                 } );
                 btnChildRepositories.setSelection( revealCompositeRepositories );
@@ -290,7 +289,7 @@ public class MetadataRepositoryView
             }
         }
         {
-            treeViewer = new TreeViewer( container, SWT.BORDER | SWT.MULTI );
+            treeViewer = new TreeViewer( container, SWT.BORDER | SWT.MULTI | SWT.VIRTUAL );
             treeViewer.setUseHashlookup( true );
             Tree tree = treeViewer.getTree();
             tree.setLayoutData( new GridData( SWT.FILL, SWT.FILL, true, true, 1, 1 ) );
@@ -307,24 +306,18 @@ public class MetadataRepositoryView
                     return super.getText( element );
                 }
             } );
-            treeViewer.setContentProvider( new InstallableUnitContentProvider()
+            treeViewer.setContentProvider( new InstallableUnitContentProvider( treeViewer )
             {
                 @Override
-                public Object[] getElements( Object inputElement )
+                protected Object[] getChildren( Object parentElement )
                 {
-                    if ( inputElement instanceof Map<?, ?> )
+                    if ( parentElement instanceof Map<?, ?> )
                     {
-                        return ( (Map<?, ?>) inputElement ).values().toArray();
+                        return ( (Map<?, ?>) parentElement ).values().toArray();
                     }
-                    return null;
-                }
-
-                @Override
-                public Object[] getChildren( Object parentElement )
-                {
-                    if ( revealCompositeRepositories && parentElement instanceof CompositeMetadataRepository )
+                    else if ( revealCompositeRepositories && parentElement instanceof CompositeMetadataRepository )
                     {
-                        return getImmediateChildren( (CompositeMetadataRepository) parentElement );
+                        return getImmediateChildrenRepositories( (CompositeMetadataRepository) parentElement );
                     }
                     else if ( parentElement instanceof IMetadataRepository )
                     {
@@ -381,6 +374,7 @@ public class MetadataRepositoryView
                 }
             } );
             treeViewer.setInput( repositories );
+            treeViewer.getTree().setItemCount( repositories.size() );
             toolkit.paintBordersFor( tree );
         }
 
@@ -540,7 +534,7 @@ public class MetadataRepositoryView
         new ErrorDialog( getSite().getShell(), title, message, null, IStatus.ERROR ).open();
     }
 
-    protected Object[] getImmediateChildren( CompositeMetadataRepository repository )
+    protected Object[] getImmediateChildrenRepositories( CompositeMetadataRepository repository )
     {
         List<IMetadataRepository> result = new ArrayList<IMetadataRepository>();
         final List<URI> missing = new ArrayList<URI>();
@@ -629,9 +623,16 @@ public class MetadataRepositoryView
             @Override
             public void run()
             {
-                treeViewer.refresh();
+                refreshTree();
             }
         } );
+    }
+
+    protected void refreshTree()
+    {
+        treeViewer.setInput( repositories );
+        treeViewer.getTree().setItemCount( repositories.size() );
+        treeViewer.refresh();
     }
 
     private static String trim( String str )

@@ -15,14 +15,21 @@ import java.util.ArrayList;
 import java.util.Collection;
 
 import org.eclipse.equinox.p2.metadata.IInstallableUnit;
-import org.eclipse.jface.viewers.ITreeContentProvider;
+import org.eclipse.jface.viewers.ILazyTreeContentProvider;
+import org.eclipse.jface.viewers.TreeViewer;
 import org.eclipse.jface.viewers.Viewer;
 
 import com.ifedorenko.p2browser.model.IGroupedInstallableUnits;
 
 abstract class InstallableUnitContentProvider
-    implements ITreeContentProvider
+    implements ILazyTreeContentProvider
 {
+    private final TreeViewer treeViewer;
+
+    public InstallableUnitContentProvider( TreeViewer treeViewer )
+    {
+        this.treeViewer = treeViewer;
+    }
 
     @Override
     public void dispose()
@@ -34,8 +41,7 @@ abstract class InstallableUnitContentProvider
     {
     }
 
-    @Override
-    public Object[] getChildren( Object parentElement )
+    protected Object[] getChildren( Object parentElement )
     {
         if ( parentElement instanceof IGroupedInstallableUnits )
         {
@@ -52,19 +58,39 @@ abstract class InstallableUnitContentProvider
     }
 
     @Override
+    public void updateElement( Object parentElement, int index )
+    {
+        Object[] elements = getChildren( parentElement );
+        if ( elements != null && elements.length > index )
+        {
+            Object element = elements[index];
+            treeViewer.replace( parentElement, index, element );
+
+            Object[] grandChildren = getChildren( element );
+            if ( grandChildren != null )
+            {
+                treeViewer.setChildCount( element, grandChildren.length );
+            }
+        }
+    }
+
+    @Override
+    public void updateChildCount( Object element, int currentChildCount )
+    {
+        Object[] elements = getChildren( element );
+        if ( elements != null && elements.length != currentChildCount )
+        {
+            treeViewer.setChildCount( element, elements.length );
+        }
+    }
+
+    @Override
     public Object getParent( Object element )
     {
         return null;
     }
 
-    @Override
-    public boolean hasChildren( Object element )
-    {
-        Object[] children = getChildren( element );
-        return children != null && children.length > 0;
-    }
-
-    protected Object[] toViewNodes( IGroupedInstallableUnits metadata, Collection<IInstallableUnit> units )
+    protected static Object[] toViewNodes( IGroupedInstallableUnits metadata, Collection<IInstallableUnit> units )
     {
         ArrayList<InstallableUnitNode> nodes = new ArrayList<InstallableUnitNode>();
         for ( IInstallableUnit unit : units )

@@ -143,21 +143,21 @@ public class DependencyHierarchyView
         Label lblHierarchy = new Label( hierarchyComposite, SWT.NONE );
         lblHierarchy.setText( "Dependency Hierarchy" );
 
-        hierarchyTreeViewer = new TreeViewer( hierarchyComposite, SWT.BORDER );
+        hierarchyTreeViewer = new TreeViewer( hierarchyComposite, SWT.BORDER | SWT.VIRTUAL );
         Tree hierarchyTree = hierarchyTreeViewer.getTree();
         hierarchyTree.setLayoutData( new GridData( SWT.FILL, SWT.FILL, true, true, 1, 1 ) );
 
-        hierarchyTreeViewer.setContentProvider( new InstallableUnitContentProvider()
+        hierarchyTreeViewer.setContentProvider( new InstallableUnitContentProvider( hierarchyTreeViewer )
         {
             @Override
-            public Object[] getElements( Object inputElement )
+            public Object[] getChildren( Object inputElement )
             {
                 if ( inputElement instanceof IGroupedInstallableUnits )
                 {
                     IGroupedInstallableUnits metadata = (IGroupedInstallableUnits) inputElement;
                     return toViewNodes( metadata, metadata.getRootIncludedInstallableUnits() );
                 }
-                return null;
+                return super.getChildren( inputElement );
             }
         } );
         hierarchyTreeViewer.addFilter( iufilter );
