@@ -40,7 +40,6 @@ import org.eclipse.jface.viewers.SelectionChangedEvent;
 import org.eclipse.jface.viewers.TableViewer;
 import org.eclipse.jface.viewers.TreeViewer;
 import org.eclipse.jface.viewers.Viewer;
-import org.eclipse.jface.viewers.ViewerFilter;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.SashForm;
 import org.eclipse.swt.layout.GridData;
@@ -54,7 +53,7 @@ import org.eclipse.ui.part.ViewPart;
 import com.ifedorenko.p2browser.director.InstallableUnitDAG;
 import com.ifedorenko.p2browser.model.IGroupedInstallableUnits;
 import com.ifedorenko.p2browser.model.InstallableUnitDependencyTree;
-import com.ifedorenko.p2browser.model.match.IInstallableUnitMatcher;
+import com.ifedorenko.p2browser.model.match.InstallableUnitsMatcher;
 
 import copied.org.eclipse.equinox.internal.p2.director.PermissiveSlicer;
 
@@ -69,64 +68,7 @@ public class DependencyHierarchyView
 
     private TableViewer listTableViewer;
 
-    private static class IUViewerFilter
-        extends ViewerFilter
-    {
-
-        private Set<IInstallableUnit> units;
-
-        @Override
-        public boolean select( Viewer viewer, Object parentElement, Object element )
-        {
-            if ( units == null )
-            {
-                return true;
-            }
-
-            if ( !( element instanceof InstallableUnitNode ) )
-            {
-                return true;
-            }
-
-            InstallableUnitNode node = (InstallableUnitNode) element;
-
-            return node.match( new IInstallableUnitMatcher()
-            {
-                @Override
-                public boolean match( IInstallableUnit unit )
-                {
-                    if ( units == null )
-                    {
-                        return true;
-                    }
-
-                    return units.contains( unit );
-                }
-            } );
-        }
-
-        public boolean setUnits( Set<IInstallableUnit> units )
-        {
-            boolean changed = !eq( this.units, units );
-            this.units = units;
-            return changed;
-        }
-
-        private static boolean eq( Set<IInstallableUnit> a, Set<IInstallableUnit> b )
-        {
-            if ( a == null && b == null )
-            {
-                return true;
-            }
-            if ( a != null && b != null )
-            {
-                return a.equals( b );
-            }
-            return false;
-        }
-    }
-
-    IUViewerFilter iufilter = new IUViewerFilter();
+    InstallableUnitDAG dag;
 
     public DependencyHierarchyView()
     {
@@ -160,7 +102,6 @@ public class DependencyHierarchyView
                 return super.getChildren( inputElement );
             }
         } );
-        hierarchyTreeViewer.addFilter( iufilter );
 
         ILabelProvider labelProvider = new InstallableUnitLabelProvider();
 
@@ -200,8 +141,15 @@ public class DependencyHierarchyView
                     }
                 }
 
-                if ( iufilter.setUnits( units ) )
+                InstallableUnitDAG filteredDag =
+                    units != null ? dag.filter( new InstallableUnitsMatcher( units ), true ) : dag;
+
+                // if ( !filteredDag.equals( dag ) )
                 {
+                    InstallableUnitDependencyTree dependencyTree = new InstallableUnitDependencyTree( filteredDag );
+
+                    hierarchyTreeViewer.setInput( dependencyTree );
+                    hierarchyTreeViewer.getTree().setItemCount( dependencyTree.getRootIncludedInstallableUnits().size() );
                     hierarchyTreeViewer.refresh();
                     hierarchyTreeViewer.expandAll();
                 }
@@ -277,12 +225,12 @@ public class DependencyHierarchyView
 
         Map<String, String> context = Collections.<String, String> emptyMap();
         PermissiveSlicer slicer = new PermissiveSlicer( allIUs, context, true, false, true, false, false );
-        InstallableUnitDAG mesh = slicer.slice( toArray( rootIUs ), monitor );
+        InstallableUnitDAG dag = slicer.slice( toArray( rootIUs ), monitor );
 
         // TODO is it okay to use permissive slicer here?
 
         Projector projector =
-            new Projector( mesh.toQueryable(), context, slicer.getNonGreedyIUs(), isListenerAttached() );
+            new Projector( dag.toQueryable(), context, slicer.getNonGreedyIUs(), isListenerAttached() );
         IInstallableUnit entryPointIU = createEntryPointIU( rootIUs );
         IInstallableUnit[] alreadyExistingRoots = new IInstallableUnit[0];
         IQueryable<IInstallableUnit> installedIUs = new QueryableArray( new IInstallableUnit[0] );
@@ -296,17 +244,11 @@ public class DependencyHierarchyView
             System.out.println( explanation );
         }
 
-        InstallableUnitDependencyTree dependencyTree =
-            new InstallableUnitDependencyTree( mesh.filter( new IInstallableUnitMatcher()
-            {
-                @Override
-                public boolean match( IInstallableUnit unit )
-                {
-                    return resolved.contains( unit );
-                }
-            } ) );
+        dag = dag.filter( new InstallableUnitsMatcher( resolved ) );
 
-        hierarchyTreeViewer.setInput( dependencyTree );
+        this.dag = dag;
+
+        hierarchyTreeViewer.setInput( new InstallableUnitDependencyTree( dag ) );
         hierarchyTreeViewer.refresh();
         hierarchyTreeViewer.expandAll();
 

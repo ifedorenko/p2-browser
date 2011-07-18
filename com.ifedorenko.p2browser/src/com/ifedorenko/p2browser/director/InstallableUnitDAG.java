@@ -68,6 +68,11 @@ public class InstallableUnitDAG
 
     public InstallableUnitDAG filter( IInstallableUnitMatcher matcher )
     {
+        return filter( matcher, false );
+    }
+
+    public InstallableUnitDAG filter( IInstallableUnitMatcher matcher, boolean includeParents )
+    {
         Map<IInstallableUnit, InstallableUnitInfo> filtered =
             new LinkedHashMap<IInstallableUnit, InstallableUnitInfo>();
 
@@ -76,6 +81,16 @@ public class InstallableUnitDAG
             if ( matcher.match( entry.getKey() ) )
             {
                 filtered.put( entry.getKey(), new InstallableUnitInfo( entry.getValue().getInstallableUnit() ) );
+            }
+        }
+
+        if ( includeParents )
+        {
+            Map<IInstallableUnit, Set<IInstallableUnit>> allparents = getParentMap( units );
+
+            for ( InstallableUnitInfo info : new ArrayList<InstallableUnitInfo>( filtered.values() ) )
+            {
+                addNewParents( filtered, allparents, info );
             }
         }
 
@@ -96,11 +111,28 @@ public class InstallableUnitDAG
         return new InstallableUnitDAG( filtered );
     }
 
-    protected static IInstallableUnit[] getRootIUs( Map<IInstallableUnit, InstallableUnitInfo> filtered )
+    protected static IInstallableUnit[] getRootIUs( Map<IInstallableUnit, InstallableUnitInfo> units )
+    {
+        Map<IInstallableUnit, Set<IInstallableUnit>> allparents = getParentMap( units );
+
+        Collection<IInstallableUnit> rootIUs = new LinkedHashSet<IInstallableUnit>();
+        for ( InstallableUnitInfo info : units.values() )
+        {
+            Set<IInstallableUnit> parents = allparents.get( info.getInstallableUnit() );
+            if ( parents == null || parents.isEmpty() )
+            {
+                rootIUs.add( info.getInstallableUnit() );
+            }
+        }
+
+        return rootIUs.toArray( new IInstallableUnit[rootIUs.size()] );
+    }
+
+    protected static Map<IInstallableUnit, Set<IInstallableUnit>> getParentMap( Map<IInstallableUnit, InstallableUnitInfo> units )
     {
         Map<IInstallableUnit, Set<IInstallableUnit>> allparents =
             new HashMap<IInstallableUnit, Set<IInstallableUnit>>();
-        for ( InstallableUnitInfo info : filtered.values() )
+        for ( InstallableUnitInfo info : units.values() )
         {
             for ( InstallableUnitInfo childInfo : info.getChildren() )
             {
@@ -113,18 +145,27 @@ public class InstallableUnitDAG
                 parents.add( info.getInstallableUnit() );
             }
         }
+        return allparents;
+    }
 
-        Collection<IInstallableUnit> rootIUs = new LinkedHashSet<IInstallableUnit>();
-        for ( InstallableUnitInfo info : filtered.values() )
+    private void addNewParents( Map<IInstallableUnit, InstallableUnitInfo> filtered,
+                                Map<IInstallableUnit, Set<IInstallableUnit>> allparents, InstallableUnitInfo info )
+    {
+        Set<IInstallableUnit> parents = allparents.get( info.getInstallableUnit() );
+        if ( parents == null )
         {
-            Set<IInstallableUnit> parents = allparents.get( info.getInstallableUnit() );
-            if ( parents == null || parents.isEmpty() )
-            {
-                rootIUs.add( info.getInstallableUnit() );
-            }
+            return;
         }
 
-        return rootIUs.toArray( new IInstallableUnit[rootIUs.size()] );
+        for ( IInstallableUnit parent : parents )
+        {
+            if ( !filtered.containsKey( parent ) )
+            {
+                InstallableUnitInfo parentInfo = units.get( parent );
+                filtered.put( parent, new InstallableUnitInfo( parent ) );
+                addNewParents( filtered, allparents, parentInfo );
+            }
+        }
     }
 
     public InstallableUnitDAG sort( final Comparator<IInstallableUnit> comparator )
@@ -168,5 +209,22 @@ public class InstallableUnitDAG
     public Collection<InstallableUnitInfo> getInstallableUnits()
     {
         return units.values();
+    }
+
+    @Override
+    public boolean equals( Object obj )
+    {
+        if ( this == obj )
+        {
+            return true;
+        }
+
+        if ( !( obj instanceof InstallableUnitDAG ) )
+        {
+            return false;
+        }
+
+        InstallableUnitDAG other = (InstallableUnitDAG) obj;
+        return Arrays.equals( rootIUs, other.rootIUs ) && units.equals( other.units );
     }
 }
