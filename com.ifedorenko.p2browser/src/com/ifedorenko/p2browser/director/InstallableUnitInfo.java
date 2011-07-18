@@ -21,9 +21,6 @@ public class InstallableUnitInfo
 {
     private final IInstallableUnit unit;
 
-    private final Map<IInstallableUnit, InstallableUnitInfo> parents =
-        new LinkedHashMap<IInstallableUnit, InstallableUnitInfo>();
-
     private final Map<IInstallableUnit, InstallableUnitInfo> children =
         new LinkedHashMap<IInstallableUnit, InstallableUnitInfo>();
 
@@ -35,16 +32,6 @@ public class InstallableUnitInfo
     public IInstallableUnit getInstallableUnit()
     {
         return unit;
-    }
-
-    public Collection<InstallableUnitInfo> getParents()
-    {
-        return parents.values();
-    }
-
-    public void addParent( InstallableUnitInfo parent )
-    {
-        parents.put( parent.getInstallableUnit(), parent );
     }
 
     public void addChild( InstallableUnitInfo child )

@@ -16,6 +16,8 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
@@ -39,6 +41,11 @@ public class InstallableUnitDAG
     {
         this.rootIUs = rootIUs;
         this.units = Collections.unmodifiableMap( new LinkedHashMap<IInstallableUnit, InstallableUnitInfo>( units ) );
+    }
+
+    public InstallableUnitDAG( Map<IInstallableUnit, InstallableUnitInfo> units )
+    {
+        this( getRootIUs( units ), units );
     }
 
     public Collection<InstallableUnitInfo> getRootInstallableUnits()
@@ -76,15 +83,6 @@ public class InstallableUnitDAG
         {
             InstallableUnitInfo original = units.get( unit.getInstallableUnit() );
 
-            for ( InstallableUnitInfo originalParent : original.getParents() )
-            {
-                InstallableUnitInfo parent = filtered.get( originalParent.getInstallableUnit() );
-                if ( parent != null )
-                {
-                    unit.addParent( parent );
-                }
-            }
-
             for ( InstallableUnitInfo originalChild : original.getChildren() )
             {
                 InstallableUnitInfo child = filtered.get( originalChild.getInstallableUnit() );
@@ -95,16 +93,38 @@ public class InstallableUnitDAG
             }
         }
 
+        return new InstallableUnitDAG( filtered );
+    }
+
+    protected static IInstallableUnit[] getRootIUs( Map<IInstallableUnit, InstallableUnitInfo> filtered )
+    {
+        Map<IInstallableUnit, Set<IInstallableUnit>> allparents =
+            new HashMap<IInstallableUnit, Set<IInstallableUnit>>();
+        for ( InstallableUnitInfo info : filtered.values() )
+        {
+            for ( InstallableUnitInfo childInfo : info.getChildren() )
+            {
+                Set<IInstallableUnit> parents = allparents.get( childInfo.getInstallableUnit() );
+                if ( parents == null )
+                {
+                    parents = new HashSet<IInstallableUnit>();
+                    allparents.put( childInfo.getInstallableUnit(), parents );
+                }
+                parents.add( info.getInstallableUnit() );
+            }
+        }
+
         Collection<IInstallableUnit> rootIUs = new LinkedHashSet<IInstallableUnit>();
         for ( InstallableUnitInfo info : filtered.values() )
         {
-            if ( info.getParents().isEmpty() )
+            Set<IInstallableUnit> parents = allparents.get( info.getInstallableUnit() );
+            if ( parents == null || parents.isEmpty() )
             {
                 rootIUs.add( info.getInstallableUnit() );
             }
         }
 
-        return new InstallableUnitDAG( rootIUs.toArray( new IInstallableUnit[rootIUs.size()] ), filtered );
+        return rootIUs.toArray( new IInstallableUnit[rootIUs.size()] );
     }
 
     public InstallableUnitDAG sort( final Comparator<IInstallableUnit> comparator )
@@ -132,11 +152,6 @@ public class InstallableUnitDAG
             for ( InstallableUnitInfo child : children )
             {
                 info.addChild( child );
-            }
-
-            for ( InstallableUnitInfo parent : entry.getValue().getParents() )
-            {
-                info.addParent( parent );
             }
 
             sorted.put( info.getInstallableUnit(), info );

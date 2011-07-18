@@ -223,7 +223,6 @@ public class Slicer {
 		}
         InstallableUnitInfo iuInfo = considered.get(iu);
         iuInfo.addChild(matchInfo);
-		matchInfo.addParent(iuInfo);
 	}
 
 	public Set<IInstallableUnit> getNonGreedyIUs() {

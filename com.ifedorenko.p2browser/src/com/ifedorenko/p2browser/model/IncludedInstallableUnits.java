@@ -11,12 +11,10 @@
 
 package com.ifedorenko.p2browser.model;
 
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
-import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -51,18 +49,16 @@ public class IncludedInstallableUnits
         {
             for ( InstallableUnitInfo otherNode : getIncludedInstallableUnit( nodes, node.getInstallableUnit() ) )
             {
-                otherNode.addParent( node );
                 node.addChild( otherNode );
             }
         }
 
-        IInstallableUnit[] rootIUs = toArray( getRootIncludedInstallableUnits( nodes ) );
         Map<IInstallableUnit, InstallableUnitInfo> units = new LinkedHashMap<IInstallableUnit, InstallableUnitInfo>();
         for ( InstallableUnitInfo info : nodes.values() )
         {
             units.put( info.getInstallableUnit(), info );
         }
-        return new InstallableUnitDAG( rootIUs, units );
+        return new InstallableUnitDAG( units );
     }
 
     public InstallableUnitDAG toInstallableUnitDAG( IQueryable<IInstallableUnit> queryable, IProgressMonitor monitor )
@@ -77,21 +73,6 @@ public class IncludedInstallableUnits
         Collection<InstallableUnitInfo> included = getIncludedInstallableUnit( nodes, parent );
 
         return getIncludedInstallableUnits( nodes, included, new LinkedHashSet<IInstallableUnit>() );
-    }
-
-    public Collection<IInstallableUnit> getRootIncludedInstallableUnits( Map<IVersionedId, InstallableUnitInfo> nodes )
-    {
-        List<IInstallableUnit> roots = new ArrayList<IInstallableUnit>();
-
-        for ( InstallableUnitInfo node : nodes.values() )
-        {
-            if ( node.getParents().isEmpty() )
-            {
-                roots.add( node.getInstallableUnit() );
-            }
-        }
-
-        return roots;
     }
 
     private Collection<IInstallableUnit> getIncludedInstallableUnits( Map<IVersionedId, InstallableUnitInfo> nodes,
@@ -133,11 +114,6 @@ public class IncludedInstallableUnits
         }
 
         return result;
-    }
-
-    private static IInstallableUnit[] toArray( Collection<IInstallableUnit> units )
-    {
-        return units.toArray( new IInstallableUnit[units.size()] );
     }
 
     private static boolean isSingleVersion( VersionRange range )
