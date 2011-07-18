@@ -15,7 +15,7 @@ import java.util.Comparator;
 
 import org.eclipse.equinox.p2.metadata.IInstallableUnit;
 
-class InstallableUnitSorter
+class InstallableUnitComparator
     implements Comparator<IInstallableUnit>
 {
     @Override

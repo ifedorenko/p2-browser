@@ -593,7 +593,7 @@ public class MetadataRepositoryView
                 dag = dag.filter( unitMatcher );
             }
 
-            dag = dag.sort( new InstallableUnitSorter() );
+            dag = dag.sort( new InstallableUnitComparator() );
 
             repositoryContent.put( location, new InstallableUnitDependencyTree( dag ) );
         }
