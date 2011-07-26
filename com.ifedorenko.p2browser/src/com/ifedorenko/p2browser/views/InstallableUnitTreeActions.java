@@ -11,12 +11,27 @@
 
 package com.ifedorenko.p2browser.views;
 
+import java.io.File;
+import java.net.URI;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.Iterator;
 
+import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.Status;
+import org.eclipse.core.runtime.jobs.Job;
+import org.eclipse.equinox.internal.p2.engine.DownloadManager;
+import org.eclipse.equinox.p2.core.IProvisioningAgent;
+import org.eclipse.equinox.p2.core.ProvisionException;
+import org.eclipse.equinox.p2.engine.ProvisioningContext;
+import org.eclipse.equinox.p2.metadata.IArtifactKey;
 import org.eclipse.equinox.p2.metadata.IInstallableUnit;
 import org.eclipse.equinox.p2.query.IQueryable;
+import org.eclipse.equinox.p2.repository.artifact.IArtifactRepository;
+import org.eclipse.equinox.p2.repository.artifact.IArtifactRepositoryManager;
+import org.eclipse.equinox.p2.repository.artifact.IArtifactRequest;
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.action.IToolBarManager;
 import org.eclipse.jface.viewers.ISelection;
@@ -28,6 +43,7 @@ import org.eclipse.swt.dnd.TextTransfer;
 import org.eclipse.swt.dnd.Transfer;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
+import org.eclipse.swt.widgets.DirectoryDialog;
 import org.eclipse.swt.widgets.Menu;
 import org.eclipse.swt.widgets.MenuItem;
 import org.eclipse.swt.widgets.Tree;
@@ -37,6 +53,9 @@ import org.eclipse.ui.IWorkbenchPartSite;
 import org.eclipse.ui.PartInitException;
 import org.eclipse.wb.swt.ResourceManager;
 
+import com.ifedorenko.p2browser.Activator;
+
+@SuppressWarnings( "restriction" )
 abstract class InstallableUnitTreeActions
 {
     private final TreeViewer treeViewer;
@@ -109,6 +128,20 @@ abstract class InstallableUnitTreeActions
             }
         } );
         mntmCopy.setText( "Copy" );
+
+        if ( getRepositoryLocations() != null )
+        {
+            MenuItem mntmSaveAs = new MenuItem( menu, SWT.NONE );
+            mntmSaveAs.addSelectionListener( new SelectionAdapter()
+            {
+                @Override
+                public void widgetSelected( SelectionEvent e )
+                {
+                    saveArtifactAs();
+                }
+            } );
+            mntmSaveAs.setText( "Save As..." );
+        }
 
         new MenuItem( menu, SWT.SEPARATOR );
 
@@ -201,6 +234,8 @@ abstract class InstallableUnitTreeActions
     }
 
     protected abstract IQueryable<IInstallableUnit> getAllInstallableUnits();
+
+    protected abstract Collection<URI> getRepositoryLocations();
 
     private Collection<InstallableUnitNode> getSelectedInstallableUnits()
     {
@@ -305,4 +340,76 @@ abstract class InstallableUnitTreeActions
         }
     }
 
+    protected void saveArtifactAs()
+    {
+        final Collection<InstallableUnitNode> selection = getSelectedInstallableUnits();
+
+        String directoryPath = new DirectoryDialog( getSite().getShell() ).open();
+        if ( directoryPath == null )
+        {
+            return;
+        }
+
+        final File directory = new File( directoryPath );
+        directory.mkdirs();
+
+        Job job = new Job( "Saving artifacts" )
+        {
+            @Override
+            protected IStatus run( IProgressMonitor monitor )
+            {
+                IProvisioningAgent agent = Activator.getDefault().getProvisioningAgent();
+
+                ProvisioningContext ctx = new ProvisioningContext( agent );
+                Collection<URI> repos = getRepositoryLocations();
+                if ( repos != null )
+                {
+                    // ctx.setMetadataRepositories( repos.toArray( new URI[repos.size()] ) );
+                    ctx.setArtifactRepositories( repos.toArray( new URI[repos.size()] ) );
+                }
+
+                try
+                {
+                    IArtifactRepositoryManager repoManager =
+                        (IArtifactRepositoryManager) agent.getService( IArtifactRepositoryManager.SERVICE_NAME );
+
+                    IArtifactRepository targetRepository;
+                    if ( repoManager.contains( directory.toURI() ) )
+                    {
+                        targetRepository = repoManager.loadRepository( directory.toURI(), monitor );
+                    }
+                    else
+                    {
+                        targetRepository =
+                            repoManager.createRepository( directory.toURI(), directory.getName(),
+                                                          IArtifactRepositoryManager.TYPE_SIMPLE_REPOSITORY,
+                                                          new HashMap<String, String>() );
+                    }
+                    // IArtifactRepository targetRepository = repoManager.loadRepository( directory.toURI(), monitor );
+                    DownloadManager mgr = new DownloadManager( ctx, agent );
+
+                    for ( InstallableUnitNode node : selection )
+                    {
+                        for ( IArtifactKey key : node.getInstallableUnit().getArtifacts() )
+                        {
+                            IArtifactRequest request =
+                                repoManager.createMirrorRequest( key, targetRepository, null, null );
+                            mgr.add( request );
+                        }
+                    }
+
+                    mgr.start( monitor );
+
+                    return Status.OK_STATUS;
+                }
+                catch ( ProvisionException e )
+                {
+                    return e.getStatus();
+                }
+
+            }
+        };
+        job.setUser( true );
+        job.schedule();
+    }
 }

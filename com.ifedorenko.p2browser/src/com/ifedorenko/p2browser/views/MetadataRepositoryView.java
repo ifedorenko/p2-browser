@@ -345,6 +345,12 @@ public class MetadataRepositoryView
             {
                 return toQueryable( toMetadataRepositories( repositories ) );
             }
+
+            @Override
+            protected Collection<URI> getRepositoryLocations()
+            {
+                return repositories;
+            }
         };
     }
 
