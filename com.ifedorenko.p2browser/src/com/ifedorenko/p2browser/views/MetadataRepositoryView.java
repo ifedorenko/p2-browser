@@ -29,6 +29,8 @@ import org.eclipse.core.runtime.OperationCanceledException;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.equinox.internal.p2.metadata.repository.CompositeMetadataRepository;
+import org.eclipse.equinox.internal.p2.updatesite.artifact.UpdateSiteArtifactRepository;
+import org.eclipse.equinox.internal.p2.updatesite.metadata.UpdateSiteMetadataRepository;
 import org.eclipse.equinox.p2.core.ProvisionException;
 import org.eclipse.equinox.p2.metadata.IInstallableUnit;
 import org.eclipse.equinox.p2.query.IQueryable;
@@ -305,7 +307,14 @@ public class MetadataRepositoryView
                 {
                     if ( element instanceof IRepository<?> )
                     {
-                        return ( (IRepository<?>) element ).getLocation().toString();
+                        String prefix = "";
+                        if ( element instanceof UpdateSiteMetadataRepository
+                            || element instanceof UpdateSiteArtifactRepository )
+                        {
+                            prefix = "[PRE-P2 COMPAT] ";
+                        }
+
+                        return prefix + ( (IRepository<?>) element ).getLocation().toString();
                     }
                     return super.getText( element );
                 }
