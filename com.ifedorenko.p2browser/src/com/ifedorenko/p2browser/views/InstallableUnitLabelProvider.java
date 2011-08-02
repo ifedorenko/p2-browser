@@ -52,9 +52,16 @@ class InstallableUnitLabelProvider
         {
             iu = (IInstallableUnit) element;
         }
+
         if ( iu != null )
         {
-            return iu.getId() + " " + iu.getVersion().toString();
+            StringBuilder sb = new StringBuilder();
+            if ( Boolean.parseBoolean( iu.getProperty( IInstallableUnit.PROP_PARTIAL_IU ) ) )
+            {
+                sb.append( "[PARTIAL] " );
+            }
+            sb.append( iu.getId() ).append( ' ' ).append( iu.getVersion().toString() );
+            return sb.toString();
         }
         return null;
     }
