@@ -17,6 +17,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.List;
 
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
@@ -239,7 +240,12 @@ abstract class InstallableUnitTreeActions
 
     private Collection<InstallableUnitNode> getSelectedInstallableUnits()
     {
-        ArrayList<InstallableUnitNode> units = new ArrayList<InstallableUnitNode>();
+        return getSelection( InstallableUnitNode.class );
+    }
+    
+    protected <T> Collection<T> getSelection( Class<T> type )
+    {
+        ArrayList<T> result = new ArrayList<T>();
 
         ISelection selection = treeViewer.getSelection();
         if ( selection instanceof IStructuredSelection )
@@ -249,14 +255,14 @@ abstract class InstallableUnitTreeActions
             {
                 Object element = iterator.next();
 
-                if ( element instanceof InstallableUnitNode )
+                if ( type.isInstance( element ) )
                 {
-                    units.add( (InstallableUnitNode) element );
+                    result.add( type.cast( element ) );
                 }
             }
         }
 
-        return units;
+        return result;
     }
 
     protected void openInstallableUnit()
@@ -286,6 +292,18 @@ abstract class InstallableUnitTreeActions
 
     protected void copyToClipboard()
     {
+        List<Transfer> dataTypes = new ArrayList<Transfer>();
+        List<Object> data = new ArrayList<Object>();
+
+        addToClipboard( dataTypes, data );
+
+        Clipboard clipboard = new Clipboard( getSite().getShell().getDisplay() );
+
+        clipboard.setContents( data.toArray(), dataTypes.toArray( new Transfer[dataTypes.size()] ) );
+    }
+
+    protected void addToClipboard( List<Transfer> dataTypes, List<Object> data )
+    {
         Collection<InstallableUnitNode> selection = getSelectedInstallableUnits();
 
         if ( selection != null && !selection.isEmpty() )
@@ -303,12 +321,8 @@ abstract class InstallableUnitTreeActions
                 sb.append( node.getInstallableUnit().getVersion().toString() );
             }
 
-            Clipboard clipboard = new Clipboard( getSite().getShell().getDisplay() );
-
-            Transfer[] dataTypes = new Transfer[] { TextTransfer.getInstance() };
-            Object[] data = new Object[] { sb.toString() };
-
-            clipboard.setContents( data, dataTypes );
+            dataTypes.add( TextTransfer.getInstance() );
+            data.add( sb.toString() );
         }
     }
 

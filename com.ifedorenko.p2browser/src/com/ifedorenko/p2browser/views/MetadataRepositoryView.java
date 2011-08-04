@@ -17,6 +17,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
@@ -39,8 +40,12 @@ import org.eclipse.equinox.p2.repository.IRepository;
 import org.eclipse.equinox.p2.repository.metadata.IMetadataRepository;
 import org.eclipse.equinox.p2.repository.metadata.IMetadataRepositoryManager;
 import org.eclipse.jface.dialogs.IDialogConstants;
+import org.eclipse.jface.viewers.ISelection;
+import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.TreeViewer;
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.dnd.TextTransfer;
+import org.eclipse.swt.dnd.Transfer;
 import org.eclipse.swt.events.ModifyEvent;
 import org.eclipse.swt.events.ModifyListener;
 import org.eclipse.swt.events.SelectionAdapter;
@@ -359,6 +364,20 @@ public class MetadataRepositoryView
             protected Collection<URI> getRepositoryLocations()
             {
                 return repositories;
+            }
+
+            @Override
+            protected void addToClipboard( List<Transfer> dataTypes, List<Object> data )
+            {
+                Collection<IMetadataRepository> repositories = getSelection( IMetadataRepository.class );
+
+                for ( IMetadataRepository repository : repositories )
+                {
+                    dataTypes.add( TextTransfer.getInstance() );
+                    data.add( repository.getLocation().toString() );
+                }
+
+                super.addToClipboard( dataTypes, data );
             }
         };
     }
