@@ -244,7 +244,7 @@ public class DependencyHierarchyView
             System.out.println( explanation );
         }
 
-        dag = dag.filter( new InstallableUnitsMatcher( resolved ) );
+        dag = dag.filter( new InstallableUnitsMatcher( resolved ), false );
 
         this.dag = dag;
 

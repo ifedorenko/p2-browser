@@ -66,11 +66,6 @@ public class InstallableUnitDAG
         return new QueryableArray( set.toArray( new IInstallableUnit[set.size()] ) );
     }
 
-    public InstallableUnitDAG filter( IInstallableUnitMatcher matcher )
-    {
-        return filter( matcher, false );
-    }
-
     public InstallableUnitDAG filter( IInstallableUnitMatcher matcher, boolean includeParents )
     {
         Map<IInstallableUnit, InstallableUnitInfo> filtered =
