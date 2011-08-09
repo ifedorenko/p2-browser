@@ -242,7 +242,7 @@ abstract class InstallableUnitTreeActions
     {
         return getSelection( InstallableUnitNode.class );
     }
-    
+
     protected <T> Collection<T> getSelection( Class<T> type )
     {
         ArrayList<T> result = new ArrayList<T>();
@@ -300,6 +300,8 @@ abstract class InstallableUnitTreeActions
         Clipboard clipboard = new Clipboard( getSite().getShell().getDisplay() );
 
         clipboard.setContents( data.toArray(), dataTypes.toArray( new Transfer[dataTypes.size()] ) );
+
+        clipboard.dispose();
     }
 
     protected void addToClipboard( List<Transfer> dataTypes, List<Object> data )
