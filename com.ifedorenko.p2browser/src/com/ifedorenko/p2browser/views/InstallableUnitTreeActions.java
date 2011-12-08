@@ -33,6 +33,8 @@ import org.eclipse.equinox.p2.query.IQueryable;
 import org.eclipse.equinox.p2.repository.artifact.IArtifactRepository;
 import org.eclipse.equinox.p2.repository.artifact.IArtifactRepositoryManager;
 import org.eclipse.equinox.p2.repository.artifact.IArtifactRequest;
+import org.eclipse.equinox.p2.repository.metadata.IMetadataRepository;
+import org.eclipse.equinox.p2.repository.metadata.IMetadataRepositoryManager;
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.action.IToolBarManager;
 import org.eclipse.jface.viewers.ISelection;
@@ -369,52 +371,18 @@ abstract class InstallableUnitTreeActions
         final File directory = new File( directoryPath );
         directory.mkdirs();
 
+        final IProvisioningAgent agent = Activator.getDefault().getProvisioningAgent();
+
         Job job = new Job( "Saving artifacts" )
         {
             @Override
             protected IStatus run( IProgressMonitor monitor )
             {
-                IProvisioningAgent agent = Activator.getDefault().getProvisioningAgent();
-
-                ProvisioningContext ctx = new ProvisioningContext( agent );
-                Collection<URI> repos = getRepositoryLocations();
-                if ( repos != null )
-                {
-                    // ctx.setMetadataRepositories( repos.toArray( new URI[repos.size()] ) );
-                    ctx.setArtifactRepositories( repos.toArray( new URI[repos.size()] ) );
-                }
-
                 try
                 {
-                    IArtifactRepositoryManager repoManager =
-                        (IArtifactRepositoryManager) agent.getService( IArtifactRepositoryManager.SERVICE_NAME );
+                    downloadMetadata( monitor );
 
-                    IArtifactRepository targetRepository;
-                    if ( repoManager.contains( directory.toURI() ) )
-                    {
-                        targetRepository = repoManager.loadRepository( directory.toURI(), monitor );
-                    }
-                    else
-                    {
-                        targetRepository =
-                            repoManager.createRepository( directory.toURI(), directory.getName(),
-                                                          IArtifactRepositoryManager.TYPE_SIMPLE_REPOSITORY,
-                                                          new HashMap<String, String>() );
-                    }
-                    // IArtifactRepository targetRepository = repoManager.loadRepository( directory.toURI(), monitor );
-                    DownloadManager mgr = new DownloadManager( ctx, agent );
-
-                    for ( InstallableUnitNode node : selection )
-                    {
-                        for ( IArtifactKey key : node.getInstallableUnit().getArtifacts() )
-                        {
-                            IArtifactRequest request =
-                                repoManager.createMirrorRequest( key, targetRepository, null, null );
-                            mgr.add( request );
-                        }
-                    }
-
-                    mgr.start( monitor );
+                    downloadArtifacts( monitor );
 
                     return Status.OK_STATUS;
                 }
@@ -422,7 +390,74 @@ abstract class InstallableUnitTreeActions
                 {
                     return e.getStatus();
                 }
+            }
 
+            protected void downloadMetadata( IProgressMonitor monitor )
+                throws ProvisionException
+            {
+                IMetadataRepositoryManager repoManager =
+                    (IMetadataRepositoryManager) agent.getService( IMetadataRepositoryManager.SERVICE_NAME );
+                IMetadataRepository targetRepository;
+                if ( repoManager.contains( directory.toURI() ) )
+                {
+                    targetRepository = repoManager.loadRepository( directory.toURI(), monitor );
+                }
+                else
+                {
+                    targetRepository =
+                        repoManager.createRepository( directory.toURI(), directory.getName(),
+                                                      IMetadataRepositoryManager.TYPE_SIMPLE_REPOSITORY,
+                                                      new HashMap<String, String>() );
+                }
+
+                Collection<IInstallableUnit> units = new ArrayList<IInstallableUnit>();
+                for ( InstallableUnitNode node : selection )
+                {
+                    units.add( node.getInstallableUnit() );
+                }
+
+                targetRepository.addInstallableUnits( units );
+            }
+
+            protected void downloadArtifacts( IProgressMonitor monitor )
+                throws ProvisionException
+            {
+                IArtifactRepositoryManager repoManager =
+                    (IArtifactRepositoryManager) agent.getService( IArtifactRepositoryManager.SERVICE_NAME );
+
+                IArtifactRepository targetRepository;
+                if ( repoManager.contains( directory.toURI() ) )
+                {
+                    targetRepository = repoManager.loadRepository( directory.toURI(), monitor );
+                }
+                else
+                {
+                    targetRepository =
+                        repoManager.createRepository( directory.toURI(), directory.getName(),
+                                                      IArtifactRepositoryManager.TYPE_SIMPLE_REPOSITORY,
+                                                      new HashMap<String, String>() );
+                }
+
+                // IArtifactRepository targetRepository = repoManager.loadRepository( directory.toURI(), monitor );
+                ProvisioningContext ctx = new ProvisioningContext( agent );
+                Collection<URI> repos = getRepositoryLocations();
+                if ( repos != null )
+                {
+                    // ctx.setMetadataRepositories( repos.toArray( new URI[repos.size()] ) );
+                    ctx.setArtifactRepositories( repos.toArray( new URI[repos.size()] ) );
+                }
+                DownloadManager mgr = new DownloadManager( ctx, agent );
+
+                for ( InstallableUnitNode node : selection )
+                {
+                    for ( IArtifactKey key : node.getInstallableUnit().getArtifacts() )
+                    {
+                        IArtifactRequest request = repoManager.createMirrorRequest( key, targetRepository, null, null );
+                        mgr.add( request );
+                    }
+                }
+
+                mgr.start( monitor );
             }
         };
         job.setUser( true );
