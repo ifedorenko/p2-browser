@@ -77,7 +77,7 @@ public class MetadataRepositoryView
     extends ViewPart
 {
 
-    public static final String ID = "com.ifedorenko.p2browser.views.MetadataRepositoryView2"; //$NON-NLS-1$
+    public static final String ID = "com.ifedorenko.p2browser.views.MetadataRepositoryView"; //$NON-NLS-1$
 
     private final FormToolkit toolkit = new FormToolkit( Display.getCurrent() );
 
@@ -328,6 +328,19 @@ public class MetadataRepositoryView
                 {
                     if ( parentElement == repositories )
                     {
+                        List<Object> result = new ArrayList<Object>();
+                        for ( URI location : repositories )
+                        {
+                            IMetadataRepository repository = allrepositories.get( location );
+                            if ( repository != null )
+                            {
+                                result.add( repository );
+                            }
+                            else
+                            {
+                                result.add( location );
+                            }
+                        }
                         return toMetadataRepositories( repositories ).toArray();
                     }
                     else if ( revealCompositeRepositories && parentElement instanceof CompositeMetadataRepository )
@@ -482,7 +495,11 @@ public class MetadataRepositoryView
 
         for ( URI location : locations )
         {
-            result.add( allrepositories.get( location ) );
+            IMetadataRepository repository = allrepositories.get( location );
+            if ( repository != null )
+            {
+                result.add( repository );
+            }
         }
 
         return result;
@@ -511,10 +528,14 @@ public class MetadataRepositoryView
                 }
                 catch ( ProvisionException e )
                 {
+                    refreshTreeInDisplayThread();
+
                     return e.getStatus();
                 }
                 catch ( OperationCanceledException e )
                 {
+                    repositories.remove( location );
+
                     return Status.CANCEL_STATUS;
                 }
             }

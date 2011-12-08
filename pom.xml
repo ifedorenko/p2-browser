@@ -21,7 +21,7 @@
   <packaging>pom</packaging>
 
   <properties>
-    <tycho-version>0.13.0-SNAPSHOT</tycho-version>
+    <tycho-version>0.13.0</tycho-version>
   </properties>
 
   <modules>
@@ -37,13 +37,6 @@
       <layout>p2</layout>
     </repository>
   </repositories>
-
-  <pluginRepositories>
-    <pluginRepository>
-      <id>tycho-snapshots</id>
-      <url>https://repository.sonatype.org/content/repositories/snapshots/</url>
-    </pluginRepository>
-  </pluginRepositories>
 
   <build>
     <plugins>

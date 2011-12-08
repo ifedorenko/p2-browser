@@ -11,16 +11,21 @@
 
 package com.ifedorenko.p2browser;
 
+import org.eclipse.ui.IFolderLayout;
 import org.eclipse.ui.IPageLayout;
 import org.eclipse.ui.IPerspectiveFactory;
+
+import com.ifedorenko.p2browser.views.MetadataRepositoryView;
 
 public class Perspective
     implements IPerspectiveFactory
 {
-
     public void createInitialLayout( IPageLayout layout )
     {
         layout.setEditorAreaVisible( false );
-    }
 
+        String editorArea = layout.getEditorArea();
+        IFolderLayout left = layout.createFolder( "left", IPageLayout.LEFT, IPageLayout.RATIO_MAX, editorArea );
+        left.addView( MetadataRepositoryView.ID );
+    }
 }

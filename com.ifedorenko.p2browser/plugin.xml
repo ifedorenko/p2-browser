@@ -41,19 +41,6 @@
       </view>
    </extension>
    <extension
-         point="org.eclipse.ui.perspectiveExtensions">
-      <perspectiveExtension
-            targetID="*">
-         <view
-               id="com.ifedorenko.p2browser.views.MetadataRepositoryView"
-               minimized="false"
-               relationship="stack"
-               relative="org.eclipse.ui.editors"
-               standalone="true">
-         </view>
-      </perspectiveExtension>
-   </extension>
-   <extension
          point="org.eclipse.ui.menus">
       <menuContribution
             locationURI="menu:org.eclipse.ui.main.menu">
