@@ -398,11 +398,11 @@ abstract class InstallableUnitTreeActions
                 IMetadataRepositoryManager repoManager =
                     (IMetadataRepositoryManager) agent.getService( IMetadataRepositoryManager.SERVICE_NAME );
                 IMetadataRepository targetRepository;
-                if ( repoManager.contains( directory.toURI() ) )
+                try
                 {
                     targetRepository = repoManager.loadRepository( directory.toURI(), monitor );
                 }
-                else
+                catch ( ProvisionException e )
                 {
                     targetRepository =
                         repoManager.createRepository( directory.toURI(), directory.getName(),
@@ -426,11 +426,11 @@ abstract class InstallableUnitTreeActions
                     (IArtifactRepositoryManager) agent.getService( IArtifactRepositoryManager.SERVICE_NAME );
 
                 IArtifactRepository targetRepository;
-                if ( repoManager.contains( directory.toURI() ) )
+                try
                 {
                     targetRepository = repoManager.loadRepository( directory.toURI(), monitor );
                 }
-                else
+                catch ( ProvisionException e )
                 {
                     targetRepository =
                         repoManager.createRepository( directory.toURI(), directory.getName(),
