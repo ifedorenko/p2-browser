@@ -63,7 +63,7 @@ class InstallableUnitLabelProvider
             sb.append( iu.getId() ).append( ' ' ).append( iu.getVersion().toString() );
             return sb.toString();
         }
-        return null;
+        return element != null ? element.toString() : "<null>";
     }
 
     @Override

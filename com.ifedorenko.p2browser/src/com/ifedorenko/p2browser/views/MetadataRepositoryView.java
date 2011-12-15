@@ -25,6 +25,7 @@ import java.util.Set;
 
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.MultiStatus;
 import org.eclipse.core.runtime.OperationCanceledException;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
@@ -352,7 +353,12 @@ public class MetadataRepositoryView
                         final IMetadataRepository repo = (IMetadataRepository) parentElement;
                         final IGroupedInstallableUnits content = repositoryContent.get( repo.getLocation() );
 
-                        return toViewNodes( content, content.getRootIncludedInstallableUnits() );
+                        if ( content != null )
+                        {
+                            return toViewNodes( content, content.getRootIncludedInstallableUnits() );
+                        }
+
+                        return null;
                     }
                     return super.getChildren( parentElement );
                 }
@@ -445,6 +451,7 @@ public class MetadataRepositoryView
             @Override
             protected IStatus run( IProgressMonitor monitor )
             {
+                List<IStatus> errors = new ArrayList<IStatus>();
                 try
                 {
                     final Map<URI, IMetadataRepository> allrepositories = new LinkedHashMap<URI, IMetadataRepository>();
@@ -456,7 +463,7 @@ public class MetadataRepositoryView
 
                     for ( URI location : MetadataRepositoryView.this.repositories )
                     {
-                        loadRepository( repoMgr, allrepositories, location, true, monitor );
+                        loadRepository( repoMgr, allrepositories, location, true, errors, monitor );
                         loadRepositoryContent( repositoryContent, location, monitor );
                     }
 
@@ -467,17 +474,16 @@ public class MetadataRepositoryView
                     MetadataRepositoryView.this.repositoryContent.putAll( repositoryContent );
 
                     refreshTreeInDisplayThread();
-
-                    return Status.OK_STATUS;
                 }
                 catch ( ProvisionException e )
                 {
-                    return e.getStatus();
+                    errors.add( e.getStatus() );
                 }
                 catch ( OperationCanceledException e )
                 {
                     return Status.CANCEL_STATUS;
                 }
+                return toStatus( errors );
             }
         };
         job.setUser( true );
@@ -512,25 +518,21 @@ public class MetadataRepositoryView
             @Override
             protected IStatus run( IProgressMonitor monitor )
             {
+                List<IStatus> errors = new ArrayList<IStatus>();
+
                 try
                 {
                     IMetadataRepositoryManager repoMgr = Activator.getRepositoryManager();
 
                     repositories.add( location );
 
-                    loadRepository( repoMgr, allrepositories, location, false, monitor );
+                    loadRepository( repoMgr, allrepositories, location, false, errors, monitor );
 
                     loadRepositoryContent( repositoryContent, location, monitor );
-
-                    refreshTreeInDisplayThread();
-
-                    return Status.OK_STATUS;
                 }
                 catch ( ProvisionException e )
                 {
-                    refreshTreeInDisplayThread();
-
-                    return e.getStatus();
+                    errors.add( e.getStatus() );
                 }
                 catch ( OperationCanceledException e )
                 {
@@ -538,6 +540,10 @@ public class MetadataRepositoryView
 
                     return Status.CANCEL_STATUS;
                 }
+
+                refreshTreeInDisplayThread();
+
+                return toStatus( errors );
             }
         };
         job.setUser( true );
@@ -590,29 +596,37 @@ public class MetadataRepositoryView
     }
 
     private void loadRepository( IMetadataRepositoryManager repoMgr, Map<URI, IMetadataRepository> allrepositories,
-                                 URI location, boolean refresh, IProgressMonitor monitor )
+                                 URI location, boolean refresh, List<IStatus> errors, IProgressMonitor monitor )
         throws ProvisionException, OperationCanceledException
     {
         if ( !allrepositories.containsKey( location ) )
         {
-            IMetadataRepository repository;
-            if ( refresh )
+            try
             {
-                repository = repoMgr.refreshRepository( location, monitor );
-            }
-            else
-            {
-                repository = repoMgr.loadRepository( location, monitor );
-            }
-            allrepositories.put( location, repository );
-
-            if ( repository instanceof CompositeMetadataRepository )
-            {
-                for ( URI childUri : ( (CompositeMetadataRepository) repository ).getChildren() )
+                IMetadataRepository repository;
+                if ( refresh )
                 {
-                    // composite repository refresh refreshes all child repositories. do not re-refresh children here
-                    loadRepository( repoMgr, allrepositories, childUri, false, monitor );
+                    repository = repoMgr.refreshRepository( location, monitor );
                 }
+                else
+                {
+                    repository = repoMgr.loadRepository( location, monitor );
+                }
+                allrepositories.put( location, repository );
+
+                if ( repository instanceof CompositeMetadataRepository )
+                {
+                    for ( URI childUri : ( (CompositeMetadataRepository) repository ).getChildren() )
+                    {
+                        // composite repository refresh refreshes all child repositories. do not re-refresh children
+                        // here
+                        loadRepository( repoMgr, allrepositories, childUri, false, errors, monitor );
+                    }
+                }
+            }
+            catch ( ProvisionException e )
+            {
+                errors.add( e.getStatus() );
             }
         }
     }
@@ -621,6 +635,13 @@ public class MetadataRepositoryView
                                         IProgressMonitor monitor )
     {
         IMetadataRepository repository = allrepositories.get( location );
+
+        if ( repository == null )
+        {
+            // repository failed to load for some reason
+            return;
+        }
+
         if ( revealCompositeRepositories && repository instanceof CompositeMetadataRepository )
         {
             for ( URI childUri : ( (CompositeMetadataRepository) repository ).getChildren() )
@@ -648,6 +669,25 @@ public class MetadataRepositoryView
             dag = dag.sort( new InstallableUnitComparator() );
 
             repositoryContent.put( location, new InstallableUnitDependencyTree( dag ) );
+        }
+    }
+
+    protected IStatus toStatus( List<IStatus> errors )
+    {
+        if ( errors.isEmpty() )
+        {
+            return Status.OK_STATUS;
+        }
+        else if ( errors.size() == 1 )
+        {
+            return errors.get( 0 );
+        }
+        else
+        {
+            MultiStatus status =
+                new MultiStatus( Activator.PLUGIN_ID, -1, errors.toArray( new IStatus[errors.size()] ),
+                                 "Problems loading repository", null );
+            return status;
         }
     }
 
