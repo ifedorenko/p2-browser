@@ -43,15 +43,7 @@ class InstallableUnitLabelProvider
     @Override
     public String getText( Object element )
     {
-        IInstallableUnit iu = null;
-        if ( element instanceof InstallableUnitNode )
-        {
-            iu = ( (InstallableUnitNode) element ).getInstallableUnit();
-        }
-        else if ( element instanceof IInstallableUnit )
-        {
-            iu = (IInstallableUnit) element;
-        }
+        IInstallableUnit iu = toInstallableUnit( element );
 
         if ( iu != null )
         {
@@ -64,6 +56,20 @@ class InstallableUnitLabelProvider
             return sb.toString();
         }
         return element != null ? element.toString() : "<null>";
+    }
+
+    protected IInstallableUnit toInstallableUnit( Object element )
+    {
+        IInstallableUnit iu = null;
+        if ( element instanceof InstallableUnitNode )
+        {
+            iu = ( (InstallableUnitNode) element ).getInstallableUnit();
+        }
+        else if ( element instanceof IInstallableUnit )
+        {
+            iu = (IInstallableUnit) element;
+        }
+        return iu;
     }
 
     @Override

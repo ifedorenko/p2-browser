@@ -40,6 +40,7 @@ import org.eclipse.equinox.p2.repository.IRepository;
 import org.eclipse.equinox.p2.repository.metadata.IMetadataRepository;
 import org.eclipse.equinox.p2.repository.metadata.IMetadataRepositoryManager;
 import org.eclipse.jface.dialogs.IDialogConstants;
+import org.eclipse.jface.viewers.IFontProvider;
 import org.eclipse.jface.viewers.TreeViewer;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.dnd.TextTransfer;
@@ -48,6 +49,8 @@ import org.eclipse.swt.events.ModifyEvent;
 import org.eclipse.swt.events.ModifyListener;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
+import org.eclipse.swt.graphics.Font;
+import org.eclipse.swt.graphics.FontData;
 import org.eclipse.swt.layout.FillLayout;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
@@ -106,6 +109,43 @@ public class MetadataRepositoryView
 
     private IInstallableUnitMatcher unitMatcher;
 
+    private class LabelProvider
+        extends InstallableUnitLabelProvider
+        implements IFontProvider
+    {
+
+        @Override
+        public Font getFont( Object element )
+        {
+            if ( unitMatcher != null )
+            {
+                IInstallableUnit unit = toInstallableUnit( element );
+                if ( unit != null && unitMatcher.match( unit ) )
+                {
+                    return boldFont;
+                }
+            }
+            return null;
+        }
+
+        @Override
+        public String getText( Object element )
+        {
+            if ( element instanceof IRepository<?> )
+            {
+                String prefix = "";
+                if ( element instanceof UpdateSiteMetadataRepository || element instanceof UpdateSiteArtifactRepository )
+                {
+                    prefix = "[PRE-P2 COMPAT] ";
+                }
+
+                return prefix + ( (IRepository<?>) element ).getLocation().toString();
+            }
+            return super.getText( element );
+        }
+
+    }
+
     private Job refreshTreeJob = new Job( "Refresh" )
     {
         @Override
@@ -122,6 +162,8 @@ public class MetadataRepositoryView
             return Status.OK_STATUS;
         }
     };
+
+    private Font boldFont;
 
     public MetadataRepositoryView()
     {
@@ -303,25 +345,7 @@ public class MetadataRepositoryView
             Tree tree = treeViewer.getTree();
             tree.setLayoutData( new GridData( SWT.FILL, SWT.FILL, true, true, 1, 1 ) );
             tree.setLinesVisible( true );
-            treeViewer.setLabelProvider( new InstallableUnitLabelProvider()
-            {
-                @Override
-                public String getText( Object element )
-                {
-                    if ( element instanceof IRepository<?> )
-                    {
-                        String prefix = "";
-                        if ( element instanceof UpdateSiteMetadataRepository
-                            || element instanceof UpdateSiteArtifactRepository )
-                        {
-                            prefix = "[PRE-P2 COMPAT] ";
-                        }
-
-                        return prefix + ( (IRepository<?>) element ).getLocation().toString();
-                    }
-                    return super.getText( element );
-                }
-            } );
+            treeViewer.setLabelProvider( new LabelProvider() );
             treeViewer.setContentProvider( new InstallableUnitContentProvider( treeViewer )
             {
                 @Override
@@ -366,6 +390,14 @@ public class MetadataRepositoryView
             treeViewer.setInput( repositories );
             treeViewer.getTree().setItemCount( repositories.size() );
             toolkit.paintBordersFor( tree );
+
+            Font font = tree.getFont();
+            FontData[] fontDatas = font.getFontData();
+            for ( FontData fontData : fontDatas )
+            {
+                fontData.setStyle( SWT.BOLD );
+            }
+            boldFont = new Font( tree.getDisplay(), fontDatas );
         }
 
         new InstallableUnitTreeActions( getViewSite(), treeViewer )
