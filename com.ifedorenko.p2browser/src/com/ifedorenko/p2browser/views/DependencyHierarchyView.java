@@ -87,6 +87,7 @@ public class DependencyHierarchyView
 
         hierarchyTreeViewer = new TreeViewer( hierarchyComposite, SWT.BORDER | SWT.VIRTUAL );
         Tree hierarchyTree = hierarchyTreeViewer.getTree();
+        hierarchyTreeViewer.setUseHashlookup( true );
         hierarchyTree.setLayoutData( new GridData( SWT.FILL, SWT.FILL, true, true, 1, 1 ) );
 
         hierarchyTreeViewer.setContentProvider( new InstallableUnitContentProvider( hierarchyTreeViewer )
@@ -146,12 +147,7 @@ public class DependencyHierarchyView
 
                 // if ( !filteredDag.equals( dag ) )
                 {
-                    InstallableUnitDependencyTree dependencyTree = new InstallableUnitDependencyTree( filteredDag );
-
-                    hierarchyTreeViewer.setInput( dependencyTree );
-                    hierarchyTreeViewer.getTree().setItemCount( dependencyTree.getRootIncludedInstallableUnits().size() );
-                    hierarchyTreeViewer.refresh();
-                    hierarchyTreeViewer.expandAll();
+                    setDependencyTree( new InstallableUnitDependencyTree( filteredDag ) );
                 }
             }
         } );
@@ -248,11 +244,17 @@ public class DependencyHierarchyView
 
         this.dag = dag;
 
-        hierarchyTreeViewer.setInput( new InstallableUnitDependencyTree( dag ) );
-        hierarchyTreeViewer.refresh();
-        hierarchyTreeViewer.expandAll();
+        setDependencyTree( new InstallableUnitDependencyTree( dag ) );
 
         listTableViewer.setInput( resolved );
+    }
+
+    void setDependencyTree( InstallableUnitDependencyTree dependencyTree )
+    {
+        hierarchyTreeViewer.setInput( dependencyTree );
+        hierarchyTreeViewer.getTree().setItemCount( dependencyTree.getRootIncludedInstallableUnits().size() );
+        hierarchyTreeViewer.refresh();
+        hierarchyTreeViewer.expandAll();
     }
 
     private IInstallableUnit createEntryPointIU( Collection<IInstallableUnit> rootIUs )
