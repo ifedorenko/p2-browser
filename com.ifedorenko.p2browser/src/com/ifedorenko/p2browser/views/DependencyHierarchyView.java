@@ -22,7 +22,11 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.NullProgressMonitor;
+import org.eclipse.core.runtime.Status;
+import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.equinox.internal.p2.director.Explanation;
 import org.eclipse.equinox.internal.p2.director.Projector;
 import org.eclipse.equinox.internal.p2.director.QueryableArray;
@@ -93,7 +97,25 @@ public class DependencyHierarchyView
 
     boolean sortList = true;
 
-    private Action filterHierarchyAction;
+    Action filterHierarchyAction;
+
+    Job applyFilterJob = new Job( "Apply filter" )
+    {
+        @Override
+        protected IStatus run( IProgressMonitor monitor )
+        {
+            getSite().getShell().getDisplay().asyncExec( new Runnable()
+            {
+                @Override
+                public void run()
+                {
+                    applyHierachyFilter();
+                    applyListFilter();
+                }
+            } );
+            return Status.OK_STATUS;
+        }
+    };
 
     // TODO share decoration logic with MetadataRepositoryView
     private class LabelProvider
@@ -134,8 +156,7 @@ public class DependencyHierarchyView
             public void filterChanged( EventObject event )
             {
                 unitMatcher = filterComposite.getMatcher();
-                applyHierachyFilter();
-                applyListFilter();
+                applyFilterJob.schedule( 500L );
             }
         } );
         filterComposite.setLayoutData( new GridData( SWT.FILL, SWT.CENTER, true, false, 1, 1 ) );
