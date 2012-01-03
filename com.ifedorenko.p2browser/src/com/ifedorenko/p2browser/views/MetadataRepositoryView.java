@@ -16,6 +16,7 @@ import java.net.URI;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.EventObject;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
@@ -45,8 +46,6 @@ import org.eclipse.jface.viewers.TreeViewer;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.dnd.TextTransfer;
 import org.eclipse.swt.dnd.Transfer;
-import org.eclipse.swt.events.ModifyEvent;
-import org.eclipse.swt.events.ModifyListener;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.graphics.Font;
@@ -55,12 +54,10 @@ import org.eclipse.swt.layout.FillLayout;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
-import org.eclipse.swt.widgets.Combo;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.DirectoryDialog;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Label;
-import org.eclipse.swt.widgets.Text;
 import org.eclipse.swt.widgets.Tree;
 import org.eclipse.ui.forms.widgets.FormToolkit;
 import org.eclipse.ui.part.ViewPart;
@@ -73,8 +70,7 @@ import com.ifedorenko.p2browser.model.IncludedInstallableUnits;
 import com.ifedorenko.p2browser.model.InstallableUnitDependencyTree;
 import com.ifedorenko.p2browser.model.UngroupedInstallableUnits;
 import com.ifedorenko.p2browser.model.match.IInstallableUnitMatcher;
-import com.ifedorenko.p2browser.model.match.InstallableUnitIDMatcher;
-import com.ifedorenko.p2browser.model.match.ProvidedCapabilityMatcher;
+import com.ifedorenko.p2browser.views.InstallableUnitFilterComposite.IFilterChangeListener;
 
 @SuppressWarnings( "restriction" )
 public class MetadataRepositoryView
@@ -104,8 +100,6 @@ public class MetadataRepositoryView
     private boolean groupIncludedIUs = true;
 
     private TreeViewer treeViewer;
-
-    private Text filterText;
 
     private IInstallableUnitMatcher unitMatcher;
 
@@ -181,46 +175,21 @@ public class MetadataRepositoryView
         gl_container.marginWidth = 0;
         container.setLayout( gl_container );
         {
-            Composite filterComposite = new Composite( container, SWT.NONE );
-            filterComposite.setLayout( new GridLayout( 2, false ) );
-            filterComposite.setLayoutData( new GridData( SWT.FILL, SWT.FILL, false, false, 1, 1 ) );
-            toolkit.adapt( filterComposite );
-            toolkit.paintBordersFor( filterComposite );
-            final Combo filterType = new Combo( filterComposite, SWT.READ_ONLY );
-            filterType.setItems( new String[] { "Filter by IU", "Filter by capability" } );
-            toolkit.adapt( filterType );
-            toolkit.paintBordersFor( filterType );
-            filterType.setText( "Filter by IU" );
-            filterText = new Text( filterComposite, SWT.BORDER | SWT.H_SCROLL | SWT.SEARCH | SWT.CANCEL );
-            filterText.setLayoutData( new GridData( SWT.FILL, SWT.CENTER, true, false, 1, 1 ) );
-            toolkit.adapt( filterText, true, true );
-            ModifyListener filterChangeListener = new ModifyListener()
+            // Composite filterComposite = new Composite( container, SWT.NONE );
+            final InstallableUnitFilterComposite filterComposite =
+                new InstallableUnitFilterComposite( container, SWT.NONE );
+            GridData gd_filterComposite = new GridData( SWT.FILL, SWT.CENTER, true, false, 1, 1 );
+            gd_filterComposite.horizontalIndent = 5;
+            filterComposite.setLayoutData( gd_filterComposite );
+            filterComposite.addFilterChangeListener( new IFilterChangeListener()
             {
-                public void modifyText( ModifyEvent e )
+                @Override
+                public void filterChanged( EventObject event )
                 {
-                    String pattern = trim( filterText.getText() );
-                    if ( pattern != null )
-                    {
-                        switch ( filterType.getSelectionIndex() )
-                        {
-                            case 1:
-                                unitMatcher = new ProvidedCapabilityMatcher( pattern );
-                                break;
-                            case 0:
-                            default:
-                                unitMatcher = new InstallableUnitIDMatcher( pattern );
-                                break;
-                        }
-                    }
-                    else
-                    {
-                        unitMatcher = null;
-                    }
+                    unitMatcher = filterComposite.getMatcher();
                     refreshTreeJob.schedule( 500L );
                 }
-            };
-            filterText.addModifyListener( filterChangeListener );
-            filterType.addModifyListener( filterChangeListener );
+            } );
         }
         {
             Composite composite = new Composite( container, SWT.NONE );
