@@ -251,10 +251,12 @@ public class DependencyHierarchyView
 
     void setDependencyTree( InstallableUnitDependencyTree dependencyTree )
     {
+        hierarchyTreeViewer.getTree().setRedraw( false );
         hierarchyTreeViewer.setInput( dependencyTree );
         hierarchyTreeViewer.getTree().setItemCount( dependencyTree.getRootIncludedInstallableUnits().size() );
         hierarchyTreeViewer.refresh();
         hierarchyTreeViewer.expandAll();
+        hierarchyTreeViewer.getTree().setRedraw( true );
     }
 
     private IInstallableUnit createEntryPointIU( Collection<IInstallableUnit> rootIUs )
