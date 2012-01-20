@@ -189,7 +189,9 @@ abstract class InstallableUnitTreeActions
             @Override
             public void run()
             {
+                treeViewer.getTree().setRedraw( false );
                 treeViewer.expandAll();
+                treeViewer.getTree().setRedraw( true );
             }
         };
         expandAll.setImageDescriptor( ResourceManager.getPluginImageDescriptor( "com.ifedorenko.p2browser",
