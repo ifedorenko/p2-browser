@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<jnlp spec="6.0+" version="${unqualifiedVersion}.${buildQualifier}" codebase="${jnlp.codebase}">
+
+  <information>
+    <title>P2 Browser</title>
+    <vendor>Igor Fedorenko</vendor>
+    <!--
+    <homepage href="" />
+    <icon kind="splash" href="splash.jpg"/>
+    -->
+    <offline-allowed/>
+    <description>P2 Browser</description>
+  </information>
+  
+  <security>
+    <all-permissions/>
+  </security>
+  
+  <application-desc main-class="org.eclipse.equinox.launcher.WebStartMain">
+    <argument>-nosplash -console -noexit -consoleLog </argument>
+  </application-desc>
+
+  <resources os="Mac">
+    <property name="osgi.ws" value="cocoa" />
+    <property name="org.eclipse.swt.internal.carbon.smallFonts" value="" />
+    <j2se version="1.6+" java-vm-args="-XstartOnFirstThread"/>
+  </resources>
+ 
+  <resources>
+    <j2se version="1.6+"/>
+    <property name="jnlp" value="true"/>
+    <property name="jnlp.packEnabled" value="true"/>
+    <property name="eclipse.product" value="com.ifedorenko.p2browser.p2browser"/>
+    <property name="osgi.bundles" value="org.eclipse.core.runtime@start,org.eclipse.equinox.ds@start"/>
+  </resources>
+</jnlp>

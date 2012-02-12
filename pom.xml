@@ -28,6 +28,7 @@
     <module>com.ifedorenko.p2browser</module>
     <module>com.ifedorenko.p2browser.feature</module>
     <module>com.ifedorenko.p2browser.rcp</module>
+    <module>com.ifedorenko.p2browser.jnlp</module>
   </modules>
 
   <repositories>
@@ -37,6 +38,18 @@
       <layout>p2</layout>
     </repository>
   </repositories>
+  
+  <pluginRepositories>
+    <pluginRepository>
+      <id>tycho-snapshots</id>
+      <url>https://oss.sonatype.org/content/groups/staging</url>
+    </pluginRepository>
+    <pluginRepository>
+      <id>tycho-jnlp-snapshots</id>
+      <url>https://repository.sonatype.org/content/repositories/snapshots/</url>
+      <snapshots><enabled>true</enabled></snapshots>
+    </pluginRepository>
+  </pluginRepositories>
 
   <build>
     <plugins>
@@ -55,6 +68,16 @@
             <environment>
               <os>win32</os>
               <ws>win32</ws>
+              <arch>x86</arch>
+            </environment>
+            <environment>
+              <os>win32</os>
+              <ws>win32</ws>
+              <arch>x86_64</arch>
+            </environment>
+            <environment>
+              <os>linux</os>
+              <ws>gtk</ws>
               <arch>x86</arch>
             </environment>
             <environment>

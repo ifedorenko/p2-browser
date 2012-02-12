@@ -1,0 +1,86 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!--
+ Copyright (c) 2011 Igor Fedorenko
+ All rights reserved. This program and the accompanying materials
+ are made available under the terms of the Eclipse Public License v1.0
+ which accompanies this distribution, and is available at
+ http://www.eclipse.org/legal/epl-v10.html
+
+ Contributors:
+      Igor Fedorenko - initial API and implementation
+-->
+
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+
+  <parent>
+    <groupId>com.ifedorenko.p2-browser</groupId>
+    <artifactId>p2-browser</artifactId>
+    <version>1.0.0-SNAPSHOT</version>
+  </parent>
+
+  <artifactId>com.ifedorenko.p2browser.jnlp</artifactId>
+  <packaging>eclipse-application</packaging>
+
+  <properties>
+    <jnlp.codebase>file://${project.build.directory}/product/eclipse</jnlp.codebase>
+    <jnlp.deleteUnpackedJars>false</jnlp.deleteUnpackedJars>
+  </properties>
+
+  <build>
+    <plugins>
+      <plugin>
+        <groupId>org.eclipse.tycho</groupId>
+        <artifactId>tycho-packaging-plugin</artifactId>
+        <version>${tycho-version}</version>
+        <configuration>
+          <separateEnvironments>false</separateEnvironments>
+          <forcePackedDependencies>true</forcePackedDependencies>
+          <createProductArchive>false</createProductArchive>
+        </configuration>
+      </plugin>
+
+      <plugin>
+        <groupId>org.sonatype.tycho</groupId>
+        <artifactId>tycho-jnlp-plugin</artifactId>
+        <version>1.0.1-SNAPSHOT</version>
+        <executions>
+          <execution>
+            <id>jnlp</id>
+            <goals>
+              <goal>pack200-normalize</goal>
+              <goal>sign-jars</goal>
+              <goal>pack200-pack</goal>
+              <goal>jnlp-file</goal>
+            </goals>
+            <configuration>
+              <deleteUnpackedJars>${jnlp.deleteUnpackedJars}</deleteUnpackedJars>
+            </configuration>
+          </execution>
+        </executions>
+        <configuration>
+          <environmentsMap>
+            <environment>
+              <key>macosx/</key>
+              <os>Mac</os>
+              <arch>x86_64</arch>
+            </environment>
+          </environmentsMap>
+          <jnlpFile>${project.build.directory}/product/eclipse/${project.artifactId}_${unqualifiedVersion}.${buildQualifier}.jnlp</jnlpFile>
+        </configuration>
+      </plugin>
+    </plugins>
+  </build>
+
+  <profiles>
+    <profile>
+      <id>github</id>
+      <properties>
+        <jnlp.codebase>http://ifedorenko.github.com/p2-browser/${unqualifiedVersion}.${buildQualifier}</jnlp.codebase>
+        <jnlp.deleteUnpackedJars>true</jnlp.deleteUnpackedJars>
+      </properties>
+    </profile>
+  </profiles>
+</project>
