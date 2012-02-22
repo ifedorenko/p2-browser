@@ -1,0 +1,129 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<jnlp spec="6.0+" version="1.0.0.201202220256" codebase="http://ifedorenko.github.com/p2-browser/1.0.0.201202220256">
+
+  <information>
+    <title>P2 Browser</title>
+    <vendor>Igor Fedorenko</vendor>
+    <!--
+    <homepage href="" />
+    <icon kind="splash" href="splash.jpg"/>
+    -->
+    <offline-allowed/>
+    <description>P2 Browser</description>
+  </information>
+  
+  <security>
+    <all-permissions/>
+  </security>
+  
+  <application-desc main-class="org.eclipse.equinox.launcher.WebStartMain">
+    <argument>-nosplash -console -noexit -consoleLog </argument>
+  </application-desc>
+
+  <resources os="Mac">
+    <property name="osgi.ws" value="cocoa" />
+    <property name="org.eclipse.swt.internal.carbon.smallFonts" value="" />
+    <j2se version="1.6+" java-vm-args="-XstartOnFirstThread"/>
+  </resources>
+ 
+  <resources>
+    <j2se version="1.6+"/>
+    <property name="jnlp" value="true"/>
+    <property name="jnlp.packEnabled" value="true"/>
+    <property name="eclipse.product" value="com.ifedorenko.p2browser.p2browser"/>
+    <property name="osgi.bundles" value="org.eclipse.core.runtime@start,org.eclipse.equinox.ds@start"/>
+  </resources>
+
+<resources>
+<jar href="plugins/com.ifedorenko.p2browser_1.0.0.201202220256.jar"/>
+<jar href="plugins/org.eclipse.ui.forms_3.5.200.v20111215-1440.jar"/>
+<jar href="plugins/org.eclipse.equinox.p2.updatesite_1.0.300.v20110808-1657.jar"/>
+<jar href="plugins/org.eclipse.equinox.p2.publisher.eclipse_1.1.0.v20111208-2102.jar"/>
+<jar href="plugins/org.eclipse.equinox.p2.publisher_1.2.0.v20111208-2108.jar"/>
+<jar href="plugins/org.eclipse.core.net_1.2.200.v20111202-1616.jar"/>
+<jar href="plugins/com.ibm.icu_4.4.2.v20110823.jar"/>
+<jar href="plugins/org.eclipse.core.commands_3.6.0.v20111007-1312.jar"/>
+<jar href="plugins/org.eclipse.core.databinding_1.4.1.v20111007-1312.jar"/>
+<jar href="plugins/org.eclipse.core.databinding.observable_1.4.1.v20111007-1312.jar"/>
+<jar href="plugins/org.eclipse.core.databinding.property_1.4.0.v20111007-1312.jar"/>
+<jar href="plugins/org.eclipse.core.databinding.beans_1.2.100.v20111007-1312.jar"/>
+<jar href="plugins/org.eclipse.core.jobs_3.5.200.v20120113-1913.jar"/>
+<jar href="plugins/org.eclipse.core.expressions_3.4.300.v20110228.jar"/>
+<jar href="plugins/org.eclipse.core.runtime_3.8.0.v20120124-1832.jar"/>
+<jar href="plugins/org.eclipse.core.runtime.compatibility.auth_3.2.200.v20120110-1626.jar"/>
+<jar href="plugins/org.eclipse.osgi_3.8.0.v20120123-1419.jar"/>
+<jar href="plugins/org.eclipse.osgi.services_3.3.0.v20111117-1210.jar"/>
+<jar href="plugins/org.eclipse.help_3.6.0.v20111021.jar"/>
+<jar href="plugins/org.eclipse.swt_3.8.0.v3820a.jar"/>
+<jar href="plugins/org.eclipse.jface_3.8.0.v20120108-2018.jar"/>
+<jar href="plugins/org.eclipse.jface.databinding_1.6.0.v20111007-1312.jar"/>
+<jar href="plugins/org.eclipse.ui_3.7.100.v20111215-1440.jar"/>
+<jar href="plugins/org.eclipse.ui.workbench_3.8.0.v20120123-1720.jar"/>
+<jar href="plugins/org.eclipse.update.configurator_3.3.100.v20100512.jar"/>
+<jar href="plugins/org.eclipse.equinox.simpleconfigurator_1.0.300.v20110815-1744.jar"/>
+<jar href="plugins/org.eclipse.rcp_3.7.0.v201201251800.jar"/>
+<jar href="plugins/org.eclipse.core.contenttype_3.4.100.v20110423-0524.jar"/>
+<jar href="plugins/org.eclipse.equinox.app_1.3.100.v20111010-1614.jar"/>
+<jar href="plugins/org.eclipse.equinox.common_3.6.100.v20120120-1540.jar"/>
+<jar href="plugins/org.eclipse.equinox.ds_1.4.0.v20120112-1400.jar"/>
+<jar href="plugins/org.eclipse.equinox.util_1.0.300.v20111010-1614.jar"/>
+<jar href="plugins/org.eclipse.equinox.preferences_3.5.0.v20120120-1210.jar"/>
+<jar href="plugins/org.eclipse.equinox.registry_3.5.200.v20111010-1614.jar"/>
+<jar href="plugins/org.eclipse.equinox.launcher_1.3.0.v20111107-1631.jar"/>
+<jar href="plugins/org.eclipse.equinox.console_1.0.0.v20111215-1210.jar"/>
+<jar href="plugins/org.apache.felix.gogo.command_0.8.0.v201108120515.jar"/>
+<jar href="plugins/org.apache.felix.gogo.runtime_0.8.0.v201108120515.jar"/>
+<jar href="plugins/org.apache.felix.gogo.shell_0.8.0.v201110170705.jar"/>
+<jar href="plugins/org.eclipse.equinox.bidi_0.9.0.v20111215-1958.jar"/>
+<jar href="plugins/org.eclipse.equinox.p2.artifact.repository_1.1.200.v20120117-0330.jar"/>
+<jar href="plugins/org.eclipse.equinox.p2.console_1.0.300.v20110808-1657.jar"/>
+<jar href="plugins/org.eclipse.equinox.p2.core_2.2.0.v20120109-1423.jar"/>
+<jar href="plugins/org.eclipse.equinox.p2.director_2.2.0.v20111231-2042.jar"/>
+<jar href="plugins/org.eclipse.equinox.p2.engine_2.2.0.v20120117-0330.jar"/>
+<jar href="plugins/org.eclipse.equinox.p2.garbagecollector_1.0.200.v20110808-1657.jar"/>
+<jar href="plugins/org.eclipse.equinox.p2.metadata_2.1.0.v20111114-0441.jar"/>
+<jar href="plugins/org.eclipse.equinox.p2.metadata.repository_1.2.0.v20110808-1657.jar"/>
+<jar href="plugins/org.eclipse.equinox.p2.repository_2.1.100.v20120117-0330.jar"/>
+<jar href="plugins/org.eclipse.equinox.p2.touchpoint.eclipse_2.1.100.v20120117-0330.jar"/>
+<jar href="plugins/org.eclipse.equinox.p2.touchpoint.natives_1.0.300.v20120117-0330.jar"/>
+<jar href="plugins/org.eclipse.equinox.simpleconfigurator.manipulator_2.0.0.v20110808-1657.jar"/>
+<jar href="plugins/org.sat4j.core_2.3.0.v20110329.jar"/>
+<jar href="plugins/org.sat4j.pb_2.3.0.v20110329.jar"/>
+<jar href="plugins/org.eclipse.ecf_3.1.300.v20111230-0120.jar"/>
+<jar href="plugins/org.eclipse.ecf.filetransfer_5.0.0.v20111230-0120.jar"/>
+<jar href="plugins/org.eclipse.ecf.identity_3.1.200.v20111230-0120.jar"/>
+<jar href="plugins/org.eclipse.ecf.provider.filetransfer_3.2.0.v20111230-0120.jar"/>
+<jar href="plugins/org.eclipse.ecf.provider.filetransfer.httpclient_4.0.1.v20111230-0120.jar"/>
+<jar href="plugins/org.eclipse.ecf.provider.filetransfer.httpclient.ssl_1.0.0.v20111230-0120.jar"/>
+<jar href="plugins/org.eclipse.ecf.provider.filetransfer.ssl_1.0.0.v20111230-0120.jar"/>
+<jar href="plugins/org.eclipse.ecf.ssl_1.0.100.v20111230-0120.jar"/>
+<jar href="plugins/org.apache.commons.codec_1.3.0.v201101211617.jar"/>
+<jar href="plugins/org.apache.commons.httpclient_3.1.0.v201012070820.jar"/>
+<jar href="plugins/org.apache.commons.logging_1.0.4.v201101211617.jar"/>
+<jar href="plugins/org.eclipse.equinox.frameworkadmin_2.0.0.v20110808-1657.jar"/>
+<jar href="plugins/org.eclipse.equinox.frameworkadmin.equinox_1.0.400.v20110905-2042.jar"/>
+<jar href="plugins/org.eclipse.equinox.security_1.1.100.v20111010-1614.jar"/>
+<jar href="plugins/org.eclipse.equinox.p2.jarprocessor_1.0.200.v20110808-1657.jar"/>
+<jar href="plugins/org.eclipse.equinox.p2.ql_2.0.100.v20110808-1657.jar"/>
+<jar href="plugins/org.eclipse.equinox.p2.transport.ecf_1.0.100.v20110902-0807.jar"/>
+<jar href="plugins/org.eclipse.equinox.p2.operations_2.2.0.v20111122-1412.jar"/></resources>
+<resources os="Mac" arch="x86_64">
+<jar href="plugins/org.eclipse.ui.cocoa_1.1.0.v20111007-1312.jar"/>
+<jar href="plugins/org.eclipse.equinox.security.macosx_1.100.100.v20111010-1614.jar"/></resources>
+<resources os="Windows" arch="x86">
+<jar href="plugins/org.eclipse.swt.win32.win32.x86_3.8.0.v3820a.jar"/>
+<jar href="plugins/org.eclipse.equinox.launcher.win32.win32.x86_1.1.200.v20110908-1331.jar"/>
+<jar href="plugins/org.eclipse.equinox.security.win32.x86_1.0.200.v20111010-1614.jar"/></resources>
+<resources os="Windows" arch="amd64">
+<jar href="plugins/org.eclipse.swt.win32.win32.x86_64_3.8.0.v3820a.jar"/>
+<jar href="plugins/org.eclipse.equinox.launcher.win32.win32.x86_64_1.1.200.v20110908-1331.jar"/>
+<jar href="plugins/org.eclipse.equinox.security.win32.x86_64_1.0.0.v20111010-1614.jar"/></resources>
+<resources os="Linux" arch="i386">
+<jar href="plugins/org.eclipse.swt.gtk.linux.x86_3.8.0.v3820a.jar"/>
+<jar href="plugins/org.eclipse.equinox.launcher.gtk.linux.x86_1.1.200.v20110908-1331.jar"/></resources>
+<resources os="Linux" arch="amd64">
+<jar href="plugins/org.eclipse.swt.gtk.linux.x86_64_3.8.0.v3820a.jar"/>
+<jar href="plugins/org.eclipse.equinox.launcher.gtk.linux.x86_64_1.1.200.v20110908-1331.jar"/></resources>
+<resources os="Mac" arch="x86_64">
+<jar href="plugins/org.eclipse.swt.cocoa.macosx.x86_64_3.8.0.v3820a.jar"/>
+<jar href="plugins/org.eclipse.equinox.launcher.cocoa.macosx.x86_64_1.1.200.v20111216-1710.jar"/></resources></jnlp>
