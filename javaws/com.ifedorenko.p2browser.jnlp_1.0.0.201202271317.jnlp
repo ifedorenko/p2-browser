@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<jnlp spec="6.0+" version="1.0.0.201202220256" codebase="http://ifedorenko.github.com/p2-browser/1.0.0.201202220256">
+<jnlp spec="6.0+" version="1.0.0.201202271317" codebase="http://ifedorenko.github.com/p2-browser/1.0.0.201202271317">
 
   <information>
     <title>P2 Browser</title>
@@ -35,7 +35,7 @@
   </resources>
 
 <resources>
-<jar href="plugins/com.ifedorenko.p2browser_1.0.0.201202220256.jar"/>
+<jar href="plugins/com.ifedorenko.p2browser_1.0.0.201202271317.jar"/>
 <jar href="plugins/org.eclipse.ui.forms_3.5.200.v20111215-1440.jar"/>
 <jar href="plugins/org.eclipse.equinox.p2.updatesite_1.0.300.v20110808-1657.jar"/>
 <jar href="plugins/org.eclipse.equinox.p2.publisher.eclipse_1.1.0.v20111208-2102.jar"/>
