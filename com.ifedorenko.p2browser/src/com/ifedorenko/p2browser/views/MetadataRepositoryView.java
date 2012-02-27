@@ -590,8 +590,14 @@ public class MetadataRepositoryView
             @Override
             public void run()
             {
+                treeViewer.getTree().setRedraw( false );
                 treeViewer.getTree().setItemCount( repositories.size() );
                 treeViewer.refresh();
+                if (unitMatcher != null)
+                {
+                    treeViewer.expandAll();
+                }
+                treeViewer.getTree().setRedraw( true );
             }
         } );
     }
