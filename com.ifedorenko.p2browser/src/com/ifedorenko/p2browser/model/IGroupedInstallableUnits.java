@@ -19,6 +19,8 @@ public interface IGroupedInstallableUnits
 {
     public int size();
 
+    public int getNodeCount();
+
     public Collection<IInstallableUnit> getInstallableUnits();
 
     /**

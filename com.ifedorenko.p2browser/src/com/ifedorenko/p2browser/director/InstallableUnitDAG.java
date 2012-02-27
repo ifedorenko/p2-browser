@@ -16,10 +16,12 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.Deque;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -41,6 +43,8 @@ public class InstallableUnitDAG
     {
         this.rootIUs = rootIUs;
         this.units = Collections.unmodifiableMap( new LinkedHashMap<IInstallableUnit, InstallableUnitInfo>( units ) );
+
+        assertNoCycles();
     }
 
     public InstallableUnitDAG( Map<IInstallableUnit, InstallableUnitInfo> units )
@@ -221,5 +225,55 @@ public class InstallableUnitDAG
 
         InstallableUnitDAG other = (InstallableUnitDAG) obj;
         return Arrays.equals( rootIUs, other.rootIUs ) && units.equals( other.units );
+    }
+
+    public int getNodeCount()
+    {
+        int count = 0;
+        Set<InstallableUnitInfo> visited = new HashSet<InstallableUnitInfo>();
+        for ( IInstallableUnit root : rootIUs )
+        {
+            count += getNodeCount( units.get( root ), visited );
+        }
+        return count;
+    }
+
+    private int getNodeCount( InstallableUnitInfo root, Set<InstallableUnitInfo> visited )
+    {
+        int count = 1; // root itself
+        for ( InstallableUnitInfo child : root.getChildren() )
+        {
+            count += getNodeCount( child, visited );
+        }
+        return count;
+    }
+
+    private void assertNoCycles()
+    {
+        Deque<InstallableUnitInfo> visited = new LinkedList<InstallableUnitInfo>();
+        for ( IInstallableUnit root : rootIUs )
+        {
+            assertNoCycles( units.get( root ), visited );
+        }
+    }
+
+    private void assertNoCycles( InstallableUnitInfo root, Deque<InstallableUnitInfo> visited )
+    {
+        for ( InstallableUnitInfo child : root.getChildren() )
+        {
+            if ( visited.contains( child ) )
+            {
+                StringBuilder msg = new StringBuilder( "Cycle has been detected " );
+                for ( InstallableUnitInfo node : visited )
+                {
+                    msg.append( " [" ).append( node.getInstallableUnit().toString() ).append( "]" );
+                }
+                msg.append( " [" ).append( child.toString() ).append( "]" );
+                throw new IllegalStateException( msg.toString() );
+            }
+            visited.addFirst( child );
+            assertNoCycles( child, visited );
+            visited.removeFirst();
+        }
     }
 }

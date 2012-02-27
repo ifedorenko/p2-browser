@@ -43,4 +43,9 @@ public class InstallableUnitInfo
     {
         return children.values();
     }
+
+    public void removeChild( InstallableUnitInfo child )
+    {
+        children.remove( child.getInstallableUnit() );
+    }
 }

@@ -40,6 +40,12 @@ public class InstallableUnitDependencyTree
     }
 
     @Override
+    public int getNodeCount()
+    {
+        return dependencyDAG.getNodeCount();
+    }
+
+    @Override
     public Collection<IInstallableUnit> getInstallableUnits()
     {
         return toInstallableUnits( dependencyDAG.getInstallableUnits() );

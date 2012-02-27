@@ -11,10 +11,13 @@
 
 package com.ifedorenko.p2browser.model;
 
+import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Deque;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
+import java.util.LinkedList;
 import java.util.Map;
 import java.util.Set;
 
@@ -58,7 +61,39 @@ public class IncludedInstallableUnits
         {
             units.put( info.getInstallableUnit(), info );
         }
+
+        // break cycles
+        for ( InstallableUnitInfo unit : units.values() )
+        {
+            breakCycles( unit, new LinkedList<InstallableUnitInfo>() );
+        }
+
         return new InstallableUnitDAG( units );
+    }
+
+    private void breakCycles( InstallableUnitInfo unit, Deque<InstallableUnitInfo> visited )
+    {
+        ArrayList<InstallableUnitInfo> cycles = new ArrayList<InstallableUnitInfo>();
+
+        for ( InstallableUnitInfo child : unit.getChildren() )
+        {
+            if ( visited.contains( child ) )
+            {
+                cycles.add( child );
+                continue;
+            }
+            visited.addFirst( child );
+            breakCycles( child, visited );
+            visited.removeFirst();
+        }
+
+        if ( !cycles.isEmpty() )
+        {
+            for ( InstallableUnitInfo child : cycles )
+            {
+                unit.removeChild( child );
+            }
+        }
     }
 
     public InstallableUnitDAG toInstallableUnitDAG( IQueryable<IInstallableUnit> queryable, IProgressMonitor monitor )

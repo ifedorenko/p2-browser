@@ -593,7 +593,7 @@ public class MetadataRepositoryView
                 treeViewer.getTree().setRedraw( false );
                 treeViewer.getTree().setItemCount( repositories.size() );
                 treeViewer.refresh();
-                if (unitMatcher != null)
+                if ( unitMatcher != null )
                 {
                     treeViewer.expandAll();
                 }
