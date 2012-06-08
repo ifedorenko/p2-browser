@@ -68,7 +68,7 @@
               <arch>x86_64</arch>
             </environment>
           </environmentsMap>
-          <jnlpFile>${project.build.directory}/product/eclipse/${project.artifactId}_${unqualifiedVersion}.${buildQualifier}.jnlp</jnlpFile>
+          <jnlpFile>${project.build.directory}/product/eclipse/${project.artifactId}</jnlpFile>
         </configuration>
       </plugin>
     </plugins>
@@ -78,7 +78,7 @@
     <profile>
       <id>github</id>
       <properties>
-        <jnlp.codebase>http://ifedorenko.github.com/p2-browser/${unqualifiedVersion}.${buildQualifier}</jnlp.codebase>
+        <jnlp.codebase>http://ifedorenko.github.com/p2-browser/javaws</jnlp.codebase>
         <jnlp.deleteUnpackedJars>true</jnlp.deleteUnpackedJars>
       </properties>
     </profile>
