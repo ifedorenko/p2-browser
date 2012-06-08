@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011 Igor Fedorenko
+ * Copyright (c) 2012 Igor Fedorenko
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -8,19 +8,18 @@
  * Contributors:
  *      Igor Fedorenko - initial API and implementation
  *******************************************************************************/
-
 package com.ifedorenko.p2browser.model.match;
 
 import org.eclipse.equinox.p2.metadata.IInstallableUnit;
 import org.eclipse.equinox.p2.metadata.IProvidedCapability;
 
-
-
-public class ProvidedCapabilityMatcher
+public class ProvidedPackageMatcher
     extends AbstractPatternMatcher
-    implements IInstallableUnitMatcher
 {
-    public ProvidedCapabilityMatcher( IMatchStrategy strategy, String pattern )
+    // see org.eclipse.equinox.spi.p2.publisher.PublisherHelper.CAPABILITY_NS_JAVA_PACKAGE
+    public static final String CAPABILITY_NS_JAVA_PACKAGE = "java.package"; //$NON-NLS-1$
+
+    public ProvidedPackageMatcher( IMatchStrategy strategy, String pattern )
     {
         super( strategy, pattern );
     }
@@ -30,7 +29,7 @@ public class ProvidedCapabilityMatcher
     {
         for ( IProvidedCapability cap : unit.getProvidedCapabilities() )
         {
-            if ( match( cap.getName() ) )
+            if ( CAPABILITY_NS_JAVA_PACKAGE.equals( cap.getNamespace() ) && match( cap.getName() ) )
             {
                 return true;
             }

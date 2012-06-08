@@ -25,8 +25,10 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Text;
 
 import com.ifedorenko.p2browser.model.match.IInstallableUnitMatcher;
+import com.ifedorenko.p2browser.model.match.IMatchStrategy;
 import com.ifedorenko.p2browser.model.match.InstallableUnitIDMatcher;
 import com.ifedorenko.p2browser.model.match.ProvidedCapabilityMatcher;
+import com.ifedorenko.p2browser.model.match.ProvidedPackageMatcher;
 
 public class InstallableUnitFilterComposite
     extends Composite
@@ -44,15 +46,19 @@ public class InstallableUnitFilterComposite
     public InstallableUnitFilterComposite( Composite parent, int style )
     {
         super( parent, style );
-        GridLayout gridLayout = new GridLayout( 2, false );
+        GridLayout gridLayout = new GridLayout( 3, false );
         gridLayout.verticalSpacing = 0;
         gridLayout.marginWidth = 0;
         gridLayout.marginHeight = 0;
         setLayout( gridLayout );
 
         final Combo filterType = new Combo( this, SWT.READ_ONLY );
-        filterType.setItems( new String[] { "Filter by IU", "Filter by capability" } );
+        filterType.setItems( new String[] { "Filter by IU", "Filter by capability", "Filter by package" } );
         filterType.setText( filterType.getItem( 0 ) );
+
+        final Combo matchStrategy = new Combo( this, SWT.READ_ONLY );
+        matchStrategy.setItems( new String[] { "Prefix", "Exact" } );
+        matchStrategy.setText( "Prefix" );
 
         final Text filterText = new Text( this, SWT.BORDER | SWT.H_SCROLL | SWT.SEARCH | SWT.CANCEL );
         filterText.setLayoutData( new GridData( SWT.FILL, SWT.CENTER, true, false, 1, 1 ) );
@@ -64,14 +70,29 @@ public class InstallableUnitFilterComposite
                 String pattern = trim( filterText.getText() );
                 if ( pattern != null )
                 {
-                    switch ( filterType.getSelectionIndex() )
+                    IMatchStrategy strategy;
+                    switch ( matchStrategy.getSelectionIndex() )
                     {
                         case 1:
-                            unitMatcher = new ProvidedCapabilityMatcher( pattern );
+                            strategy = IMatchStrategy.EXACT;
                             break;
                         case 0:
                         default:
-                            unitMatcher = new InstallableUnitIDMatcher( pattern );
+                            strategy = IMatchStrategy.PREFIX;
+                            break;
+                    }
+
+                    switch ( filterType.getSelectionIndex() )
+                    {
+                        case 1:
+                            unitMatcher = new ProvidedCapabilityMatcher( strategy, pattern );
+                            break;
+                        case 2:
+                            unitMatcher = new ProvidedPackageMatcher( strategy, pattern );
+                            break;
+                        case 0:
+                        default:
+                            unitMatcher = new InstallableUnitIDMatcher( strategy, pattern );
                             break;
                     }
                 }
@@ -89,6 +110,7 @@ public class InstallableUnitFilterComposite
 
         filterText.addModifyListener( filterChangeListener );
         filterType.addModifyListener( filterChangeListener );
+        matchStrategy.addModifyListener( filterChangeListener );
     }
 
     @Override

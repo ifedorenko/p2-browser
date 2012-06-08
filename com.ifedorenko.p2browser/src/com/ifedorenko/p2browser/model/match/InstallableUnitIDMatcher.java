@@ -18,9 +18,9 @@ public class InstallableUnitIDMatcher
     extends AbstractPatternMatcher
     implements IInstallableUnitMatcher
 {
-    public InstallableUnitIDMatcher( String pattern )
+    public InstallableUnitIDMatcher( IMatchStrategy strategy, String pattern )
     {
-        super( pattern );
+        super( strategy, pattern );
     }
 
     @Override

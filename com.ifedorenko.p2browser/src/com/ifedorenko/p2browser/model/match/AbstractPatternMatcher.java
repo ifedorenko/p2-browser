@@ -16,16 +16,18 @@ abstract class AbstractPatternMatcher
     implements IInstallableUnitMatcher
 {
 
+    private final IMatchStrategy strategy;
+
     private final String pattern;
 
-    protected AbstractPatternMatcher( String pattern )
+    protected AbstractPatternMatcher( IMatchStrategy strategy, String pattern )
     {
+        this.strategy = strategy;
         this.pattern = pattern;
-
     }
 
     protected boolean match( String string )
     {
-        return string != null && string.contains( pattern );
+        return strategy.match( string, pattern );
     }
 }
