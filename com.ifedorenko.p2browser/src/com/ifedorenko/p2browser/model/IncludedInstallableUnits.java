@@ -151,7 +151,7 @@ public class IncludedInstallableUnits
         return result;
     }
 
-    private static boolean isSingleVersion( VersionRange range )
+    public static boolean isSingleVersion( VersionRange range )
     {
         // RequiredCapability.isVersionStrict
         return range.getIncludeMaximum() && range.getIncludeMinimum() && range.getMinimum().equals( range.getMaximum() );

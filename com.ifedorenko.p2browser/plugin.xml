@@ -37,7 +37,19 @@
             allowMultiple="true"
             class="com.ifedorenko.p2browser.views.DependencyHierarchyView"
             id="com.ifedorenko.p2browser.views.DependencyHierarchyView"
-            name="Included IUs">
+            name="Dependencies">
+      </view>
+      <view
+            allowMultiple="true"
+            class="com.ifedorenko.p2browser.views.ReferenceHierarchyView"
+            id="com.ifedorenko.p2browser.views.ReferenceHierarchyView"
+            name="References">
+      </view>
+      <view
+            allowMultiple="true"
+            class="com.ifedorenko.p2browser.views.FeatureReferenceHierarchyView"
+            id="com.ifedorenko.p2browser.views.FeatureReferenceHierarchyView"
+            name="Features">
       </view>
    </extension>
    <extension

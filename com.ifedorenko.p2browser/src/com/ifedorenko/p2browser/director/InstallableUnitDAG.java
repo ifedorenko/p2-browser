@@ -218,9 +218,9 @@ public class InstallableUnitDAG
         return units.get( unit );
     }
 
-    public Collection<InstallableUnitInfo> getInstallableUnits()
+    public Collection<IInstallableUnit> getInstallableUnits()
     {
-        return units.values();
+        return units.keySet();
     }
 
     @Override

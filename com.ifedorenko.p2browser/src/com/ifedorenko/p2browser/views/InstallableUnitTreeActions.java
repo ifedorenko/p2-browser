@@ -114,10 +114,32 @@ abstract class InstallableUnitTreeActions
             @Override
             public void widgetSelected( SelectionEvent e )
             {
-                openIncludedInstallableUnits();
+                openHierarchyView( DependencyHierarchyView.ID );
             }
         } );
         mntmOpenDependencies.setText( "Open Dependencies" );
+
+        MenuItem mntmOpenReferences = new MenuItem( menu, SWT.NONE );
+        mntmOpenReferences.addSelectionListener( new SelectionAdapter()
+        {
+            @Override
+            public void widgetSelected( SelectionEvent e )
+            {
+                openHierarchyView( ReferenceHierarchyView.ID );
+            }
+        } );
+        mntmOpenReferences.setText( "Open References" );
+
+        MenuItem mntmOpenFeatures = new MenuItem( menu, SWT.NONE );
+        mntmOpenFeatures.addSelectionListener( new SelectionAdapter()
+        {
+            @Override
+            public void widgetSelected( SelectionEvent e )
+            {
+                openHierarchyView( FeatureReferenceHierarchyView.ID );
+            }
+        } );
+        mntmOpenFeatures.setText( "Open Including Features" );
 
         new MenuItem( menu, SWT.SEPARATOR );
 
@@ -210,7 +232,7 @@ abstract class InstallableUnitTreeActions
     // IMenuManager manager = getViewSite().getActionBars().getMenuManager();
     // }
 
-    protected void openIncludedInstallableUnits()
+    protected void openHierarchyView( String viewId )
     {
         IWorkbenchPage activePage = getSite().getWorkbenchWindow().getActivePage();
 
@@ -224,10 +246,10 @@ abstract class InstallableUnitTreeActions
 
         try
         {
-            DependencyHierarchyView iusView =
-                (DependencyHierarchyView) activePage.showView( DependencyHierarchyView.ID, sb.toString(),
-                                                               IWorkbenchPage.VIEW_ACTIVATE
-                                                                   | IWorkbenchPage.VIEW_CREATE );
+            AbstractInstallableUnitHierarchyView iusView =
+                (AbstractInstallableUnitHierarchyView) activePage.showView( viewId, sb.toString(),
+                                                                            IWorkbenchPage.VIEW_ACTIVATE
+                                                                                | IWorkbenchPage.VIEW_CREATE );
 
             iusView.setMetadata( getAllInstallableUnits(), InstallableUnitNode.toInstallableUnits( selection ) );
         }
@@ -236,6 +258,7 @@ abstract class InstallableUnitTreeActions
             // TODO Auto-generated catch block
             e1.printStackTrace();
         }
+
     }
 
     protected abstract IQueryable<IInstallableUnit> getAllInstallableUnits();

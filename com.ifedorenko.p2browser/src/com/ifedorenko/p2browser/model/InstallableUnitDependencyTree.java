@@ -48,7 +48,7 @@ public class InstallableUnitDependencyTree
     @Override
     public Collection<IInstallableUnit> getInstallableUnits()
     {
-        return toInstallableUnits( dependencyDAG.getInstallableUnits() );
+        return dependencyDAG.getInstallableUnits();
     }
 
     @Override

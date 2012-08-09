@@ -16,30 +16,30 @@ import java.util.Collection;
 import org.eclipse.equinox.p2.metadata.IInstallableUnit;
 import org.eclipse.equinox.p2.query.IQueryable;
 
-import com.ifedorenko.p2browser.director.DependenciesCalculator;
 import com.ifedorenko.p2browser.director.IInstallableUnitHierarchyCalculator;
+import com.ifedorenko.p2browser.director.ReferencesCalculator;
 
-public class DependencyHierarchyView
+public class ReferenceHierarchyView
     extends AbstractInstallableUnitHierarchyView
 {
-    public static final String ID = "com.ifedorenko.p2browser.views.DependencyHierarchyView"; //$NON-NLS-1$
+    public static final String ID = "com.ifedorenko.p2browser.views.ReferenceHierarchyView"; //$NON-NLS-1$
 
     @Override
     String getListSectionTitle()
     {
-        return "Resolved Dependencies";
+        return "All References";
     }
 
     @Override
     String getHierarchySectionTitle()
     {
-        return "Dependency Hierarchy";
+        return "Reference Hierarchy (unique paths only)";
     }
 
     @Override
     protected IInstallableUnitHierarchyCalculator getCalculator( IQueryable<IInstallableUnit> units,
                                                                  Collection<IInstallableUnit> roots )
     {
-        return new DependenciesCalculator( units, roots );
+        return new ReferencesCalculator( units, roots );
     }
 }

@@ -5,6 +5,8 @@
 * See composite repositories structure
 * Save repository metadata and individual artifacts locally
 * See installable unit dependency tree and list (try it, highly recommended!)
+* See installable unit direct and indirect references
+* See features that include installable unit
 
 ## Java WebStart Launcher
 
