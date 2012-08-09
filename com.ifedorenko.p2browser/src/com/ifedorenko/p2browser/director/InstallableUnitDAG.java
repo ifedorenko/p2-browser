@@ -11,12 +11,15 @@
 
 package com.ifedorenko.p2browser.director;
 
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.PrintStream;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
-import java.util.Deque;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
@@ -25,6 +28,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.zip.GZIPOutputStream;
 
 import org.eclipse.equinox.internal.p2.director.QueryableArray;
 import org.eclipse.equinox.p2.metadata.IInstallableUnit;
@@ -44,7 +48,7 @@ public class InstallableUnitDAG
         this.rootIUs = rootIUs;
         this.units = Collections.unmodifiableMap( new LinkedHashMap<IInstallableUnit, InstallableUnitInfo>( units ) );
 
-        assertNoCycles();
+        assertPreconditions();
     }
 
     public InstallableUnitDAG( Map<IInstallableUnit, InstallableUnitInfo> units )
@@ -177,7 +181,7 @@ public class InstallableUnitDAG
 
         for ( Map.Entry<IInstallableUnit, InstallableUnitInfo> entry : this.units.entrySet() )
         {
-            InstallableUnitInfo info = new InstallableUnitInfo( entry.getKey() );
+            InstallableUnitInfo info = getOrNew( sorted, entry.getKey() );
 
             List<InstallableUnitInfo> children = new ArrayList<InstallableUnitInfo>( entry.getValue().getChildren() );
             Collections.sort( children, new Comparator<InstallableUnitInfo>()
@@ -191,13 +195,22 @@ public class InstallableUnitDAG
 
             for ( InstallableUnitInfo child : children )
             {
-                info.addChild( child );
+                info.addChild( getOrNew( sorted, child.getInstallableUnit() ) );
             }
-
-            sorted.put( info.getInstallableUnit(), info );
         }
 
         return new InstallableUnitDAG( rootIUs, sorted );
+    }
+
+    private static InstallableUnitInfo getOrNew( Map<IInstallableUnit, InstallableUnitInfo> dag, IInstallableUnit unit )
+    {
+        InstallableUnitInfo info = dag.get( unit );
+        if ( info == null )
+        {
+            info = new InstallableUnitInfo( unit );
+            dag.put( unit, info );
+        }
+        return info;
     }
 
     public InstallableUnitInfo getInstallableUnit( IInstallableUnit unit )
@@ -248,32 +261,108 @@ public class InstallableUnitDAG
         return count;
     }
 
-    private void assertNoCycles()
+    private void assertPreconditions()
     {
-        Deque<InstallableUnitInfo> visited = new LinkedList<InstallableUnitInfo>();
-        for ( IInstallableUnit root : rootIUs )
+        for ( InstallableUnitInfo info : units.values() )
         {
-            assertNoCycles( units.get( root ), visited );
+            for ( InstallableUnitInfo child : info.getChildren() )
+            {
+                if ( child != units.get( child.getInstallableUnit() ) )
+                {
+                    throw new IllegalStateException( "Inconsistent/duplicate IU information "
+                        + child.getInstallableUnit() );
+                }
+            }
+        }
+
+        for ( IInstallableUnit rootIU : rootIUs )
+        {
+            InstallableUnitInfo rootInfo = units.get( rootIU );
+            LinkedList<InstallableUnitInfo> backtrace = new LinkedList<InstallableUnitInfo>();
+            backtrace.add( rootInfo ); // seed backtrace
+            assertNoCycles( rootInfo, backtrace, new HashSet<InstallableUnitInfo>() );
         }
     }
 
-    private void assertNoCycles( InstallableUnitInfo root, Deque<InstallableUnitInfo> visited )
+    private void assertNoCycles( InstallableUnitInfo root, LinkedList<InstallableUnitInfo> backtrace,
+                                 Set<InstallableUnitInfo> visited )
     {
         for ( InstallableUnitInfo child : root.getChildren() )
         {
-            if ( visited.contains( child ) )
+            if ( backtrace.contains( child ) )
             {
                 StringBuilder msg = new StringBuilder( "Cycle has been detected " );
-                for ( InstallableUnitInfo node : visited )
+                for ( InstallableUnitInfo node : backtrace )
                 {
                     msg.append( " [" ).append( node.getInstallableUnit().toString() ).append( "]" );
                 }
-                msg.append( " [" ).append( child.toString() ).append( "]" );
+                // child closes the cycle
+                msg.append( " [" ).append( child.getInstallableUnit().toString() ).append( "]" );
                 throw new IllegalStateException( msg.toString() );
             }
-            visited.addFirst( child );
-            assertNoCycles( child, visited );
-            visited.removeFirst();
+            if ( visited.add( child ) )
+            {
+                backtrace.addLast( child );
+                assertNoCycles( child, backtrace, visited );
+                backtrace.removeLast();
+            }
         }
     }
+
+    public int getEdgeCount()
+    {
+        int result = 0;
+        for ( InstallableUnitInfo info : units.values() )
+        {
+            result += info.getChildren().size();
+        }
+        return result;
+    }
+
+    public void print( PrintStream out )
+    {
+        out.format( "root#=%d unit#=%d edge%s\n", rootIUs.length, units.size(), getEdgeCount() );
+        // TODO number of paths
+        for ( IInstallableUnit root : rootIUs )
+        {
+            print( out, root, 1 );
+        }
+    }
+
+    private void print( PrintStream out, IInstallableUnit unit, int level )
+    {
+        StringBuilder sb = new StringBuilder();
+        for ( int i = 0; i < level; i++ )
+        {
+            sb.append( "  " );
+        }
+        sb.append( unit.toString() );
+        out.println( sb.toString() );
+        InstallableUnitInfo info = units.get( unit );
+        for ( InstallableUnitInfo child : info.getChildren() )
+        {
+            print( out, child.getInstallableUnit(), level + 1 );
+        }
+    }
+
+    public void print( File file )
+    {
+        try
+        {
+            PrintStream out = new PrintStream( new GZIPOutputStream( new FileOutputStream( file ) ) );
+            try
+            {
+                print( out );
+            }
+            finally
+            {
+                out.close();
+            }
+        }
+        catch ( IOException e )
+        {
+            e.printStackTrace();
+        }
+    }
+
 }
