@@ -97,7 +97,7 @@ public class MetadataRepositoryView
 
     private boolean revealCompositeRepositories = true;
 
-    private boolean groupIncludedIUs = true;
+    private boolean groupIncludedIUs = false;
 
     private TreeViewer treeViewer;
 
