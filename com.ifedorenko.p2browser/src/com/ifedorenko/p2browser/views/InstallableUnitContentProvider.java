@@ -13,6 +13,8 @@ package com.ifedorenko.p2browser.views;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashMap;
+import java.util.Map;
 
 import org.eclipse.equinox.p2.metadata.IInstallableUnit;
 import org.eclipse.jface.viewers.ILazyTreeContentProvider;
@@ -25,6 +27,8 @@ abstract class InstallableUnitContentProvider
     implements ILazyTreeContentProvider
 {
     private final TreeViewer treeViewer;
+
+    private Map<IInstallableUnit, InstallableUnitNode> nodes;
 
     public InstallableUnitContentProvider( TreeViewer treeViewer )
     {
@@ -39,6 +43,7 @@ abstract class InstallableUnitContentProvider
     @Override
     public void inputChanged( Viewer viewer, Object oldInput, Object newInput )
     {
+        nodes = new HashMap<IInstallableUnit, InstallableUnitNode>();
     }
 
     protected Object[] getChildren( Object parentElement )
@@ -90,12 +95,18 @@ abstract class InstallableUnitContentProvider
         return null;
     }
 
-    protected static Object[] toViewNodes( IGroupedInstallableUnits metadata, Collection<IInstallableUnit> units )
+    protected Object[] toViewNodes( IGroupedInstallableUnits metadata, Collection<IInstallableUnit> units )
     {
         ArrayList<InstallableUnitNode> nodes = new ArrayList<InstallableUnitNode>();
         for ( IInstallableUnit unit : units )
         {
-            nodes.add( new InstallableUnitNode( metadata, unit ) );
+            InstallableUnitNode node = this.nodes.get( unit );
+            if ( node == null )
+            {
+                node = new InstallableUnitNode( metadata, unit );
+                this.nodes.put( unit, node );
+            }
+            nodes.add( node );
         }
         return nodes.toArray();
     }
