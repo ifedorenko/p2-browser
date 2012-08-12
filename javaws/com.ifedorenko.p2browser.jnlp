@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<jnlp spec="6.0+" version="1.0.0.201206080306" codebase="http://ifedorenko.github.com/p2-browser/javaws">
+<jnlp spec="6.0+" version="1.0.0.201208121553" codebase="http://ifedorenko.github.com/p2-browser/javaws">
 
   <information>
     <title>P2 Browser</title>
@@ -35,7 +35,7 @@
   </resources>
 
 <resources>
-<jar href="plugins/com.ifedorenko.p2browser_1.0.0.201206080306.jar"/>
+<jar href="plugins/com.ifedorenko.p2browser_1.0.0.201208121553.jar"/>
 <jar href="plugins/org.eclipse.ui.forms_3.5.200.v20120521-2332.jar"/>
 <jar href="plugins/org.eclipse.equinox.p2.updatesite_1.0.400.v20120412-1615.jar"/>
 <jar href="plugins/org.eclipse.equinox.p2.publisher.eclipse_1.1.0.v20120511-1931.jar"/>
@@ -54,14 +54,14 @@
 <jar href="plugins/org.eclipse.osgi_3.8.0.v20120529-1548.jar"/>
 <jar href="plugins/org.eclipse.osgi.services_3.3.100.v20120522-1822.jar"/>
 <jar href="plugins/org.eclipse.help_3.6.0.v20120521-2344.jar"/>
-<jar href="plugins/org.eclipse.swt_3.8.0.v3832d.jar"/>
+<jar href="plugins/org.eclipse.swt_3.8.0.v3833.jar"/>
 <jar href="plugins/org.eclipse.jface_3.8.0.v20120521-2332.jar"/>
 <jar href="plugins/org.eclipse.jface.databinding_1.6.0.v20120521-2332.jar"/>
 <jar href="plugins/org.eclipse.ui_3.8.0.v20120523-1546.jar"/>
 <jar href="plugins/org.eclipse.ui.workbench_3.8.0.v20120521-2332.jar"/>
 <jar href="plugins/org.eclipse.update.configurator_3.3.200.v20120523-1742.jar"/>
 <jar href="plugins/org.eclipse.equinox.simpleconfigurator_1.0.300.v20110815-1744.jar"/>
-<jar href="plugins/org.eclipse.rcp_3.8.0.v201205310600.jar"/>
+<jar href="plugins/org.eclipse.rcp_3.8.0.v201206081200.jar"/>
 <jar href="plugins/org.eclipse.core.contenttype_3.4.200.v20120523-2004.jar"/>
 <jar href="plugins/org.eclipse.equinox.app_1.3.100.v20120522-1841.jar"/>
 <jar href="plugins/org.eclipse.equinox.common_3.6.100.v20120522-1841.jar"/>
@@ -89,18 +89,18 @@
 <jar href="plugins/org.eclipse.equinox.simpleconfigurator.manipulator_2.0.0.v20110808-1657.jar"/>
 <jar href="plugins/org.sat4j.core_2.3.0.v20110329.jar"/>
 <jar href="plugins/org.sat4j.pb_2.3.0.v20110329.jar"/>
-<jar href="plugins/org.eclipse.ecf_3.1.300.v20120319-0616.jar"/>
-<jar href="plugins/org.eclipse.ecf.filetransfer_5.0.0.v20120319-0616.jar"/>
-<jar href="plugins/org.eclipse.ecf.identity_3.1.200.v20120319-0616.jar"/>
-<jar href="plugins/org.eclipse.ecf.provider.filetransfer_3.2.0.v20120319-0616.jar"/>
-<jar href="plugins/org.eclipse.ecf.provider.filetransfer.httpclient_4.0.200.v20120319-0616.jar"/>
-<jar href="plugins/org.eclipse.ecf.provider.filetransfer.httpclient.ssl_1.0.0.v20120319-0616.jar"/>
-<jar href="plugins/org.eclipse.ecf.provider.filetransfer.ssl_1.0.0.v20120319-0616.jar"/>
-<jar href="plugins/org.eclipse.ecf.ssl_1.0.100.v20120319-0616.jar"/>
+<jar href="plugins/org.eclipse.ecf_3.1.300.v20120608-0148.jar"/>
+<jar href="plugins/org.eclipse.ecf.filetransfer_5.0.0.v20120608-0148.jar"/>
+<jar href="plugins/org.eclipse.ecf.identity_3.1.200.v20120608-0148.jar"/>
+<jar href="plugins/org.eclipse.ecf.provider.filetransfer_3.2.0.v20120608-0148.jar"/>
+<jar href="plugins/org.eclipse.ecf.provider.filetransfer.httpclient_4.0.200.v20120608-0148.jar"/>
+<jar href="plugins/org.eclipse.ecf.provider.filetransfer.httpclient.ssl_1.0.0.v20120608-0148.jar"/>
+<jar href="plugins/org.eclipse.ecf.provider.filetransfer.ssl_1.0.0.v20120608-0148.jar"/>
+<jar href="plugins/org.eclipse.ecf.ssl_1.0.100.v20120608-0148.jar"/>
 <jar href="plugins/org.apache.commons.codec_1.3.0.v201101211617.jar"/>
 <jar href="plugins/org.apache.commons.httpclient_3.1.0.v201012070820.jar"/>
 <jar href="plugins/org.apache.commons.logging_1.0.4.v201101211617.jar"/>
-<jar href="plugins/org.eclipse.equinox.frameworkadmin_2.0.0.v20110808-1657.jar"/>
+<jar href="plugins/org.eclipse.equinox.frameworkadmin_2.0.100.v20120606-175127.jar"/>
 <jar href="plugins/org.eclipse.equinox.frameworkadmin.equinox_1.0.400.v20120428-0117.jar"/>
 <jar href="plugins/org.eclipse.equinox.security_1.1.100.v20120522-1841.jar"/>
 <jar href="plugins/org.eclipse.equinox.p2.jarprocessor_1.0.200.v20110808-1657.jar"/>
@@ -111,19 +111,19 @@
 <jar href="plugins/org.eclipse.ui.cocoa_1.1.1.v20120523-1956.jar"/>
 <jar href="plugins/org.eclipse.equinox.security.macosx_1.100.200.v20120522-2049.jar"/></resources>
 <resources os="Windows" arch="x86">
-<jar href="plugins/org.eclipse.swt.win32.win32.x86_3.8.0.v3832d.jar"/>
+<jar href="plugins/org.eclipse.swt.win32.win32.x86_3.8.0.v3833.jar"/>
 <jar href="plugins/org.eclipse.equinox.launcher.win32.win32.x86_1.1.200.v20120522-1813.jar"/>
 <jar href="plugins/org.eclipse.equinox.security.win32.x86_1.0.300.v20120522-2049.jar"/></resources>
 <resources os="Windows" arch="amd64">
-<jar href="plugins/org.eclipse.swt.win32.win32.x86_64_3.8.0.v3832d.jar"/>
+<jar href="plugins/org.eclipse.swt.win32.win32.x86_64_3.8.0.v3833.jar"/>
 <jar href="plugins/org.eclipse.equinox.launcher.win32.win32.x86_64_1.1.200.v20120522-1813.jar"/>
 <jar href="plugins/org.eclipse.equinox.security.win32.x86_64_1.0.100.v20120522-2049.jar"/></resources>
 <resources os="Linux" arch="i386">
-<jar href="plugins/org.eclipse.swt.gtk.linux.x86_3.8.0.v3832d.jar"/>
+<jar href="plugins/org.eclipse.swt.gtk.linux.x86_3.8.0.v3833.jar"/>
 <jar href="plugins/org.eclipse.equinox.launcher.gtk.linux.x86_1.1.200.v20120522-1813.jar"/></resources>
 <resources os="Linux" arch="amd64">
-<jar href="plugins/org.eclipse.swt.gtk.linux.x86_64_3.8.0.v3832d.jar"/>
+<jar href="plugins/org.eclipse.swt.gtk.linux.x86_64_3.8.0.v3833.jar"/>
 <jar href="plugins/org.eclipse.equinox.launcher.gtk.linux.x86_64_1.1.200.v20120522-1813.jar"/></resources>
 <resources os="Mac" arch="x86_64">
-<jar href="plugins/org.eclipse.swt.cocoa.macosx.x86_64_3.8.0.v3832d.jar"/>
+<jar href="plugins/org.eclipse.swt.cocoa.macosx.x86_64_3.8.0.v3833.jar"/>
 <jar href="plugins/org.eclipse.equinox.launcher.cocoa.macosx.x86_64_1.1.200.v20120522-1813.jar"/></resources></jnlp>
