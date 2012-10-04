@@ -11,6 +11,7 @@
 
 package com.ifedorenko.p2browser.dialogs;
 
+import java.io.File;
 import java.net.URI;
 import java.net.URISyntaxException;
 
@@ -19,6 +20,8 @@ import org.eclipse.jface.dialogs.TrayDialog;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.ModifyEvent;
 import org.eclipse.swt.events.ModifyListener;
+import org.eclipse.swt.events.SelectionAdapter;
+import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
@@ -26,6 +29,7 @@ import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Combo;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
+import org.eclipse.swt.widgets.DirectoryDialog;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Text;
@@ -56,7 +60,7 @@ public class RepositoryLocationDialog
     protected Control createDialogArea( Composite parent )
     {
         Composite container = (Composite) super.createDialogArea( parent );
-        container.setLayout( new GridLayout( 2, false ) );
+        container.setLayout( new GridLayout( 3, false ) );
 
         Label lblLocation = new Label( container, SWT.NONE );
         lblLocation.setLayoutData( new GridData( SWT.RIGHT, SWT.CENTER, false, false, 1, 1 ) );
@@ -82,9 +86,25 @@ public class RepositoryLocationDialog
         } );
         combo.setLayoutData( new GridData( SWT.FILL, SWT.CENTER, true, false, 1, 1 ) );
 
+        Button button = new Button( container, SWT.NONE );
+        button.addSelectionListener( new SelectionAdapter() {
+          public void widgetSelected( SelectionEvent e ) {
+            String path = null;
+            
+            DirectoryDialog dialog = new DirectoryDialog( getShell() );
+            if ((path = dialog.open()) != null) {
+              location = new File(path).toURI();
+              combo.setText(location.toString());
+              message.setText( "" );
+              getButton( IDialogConstants.OK_ID ).setEnabled( true );
+            }
+          }
+        });
+        button.setText("Local...");
+        button.setLayoutData( new GridData( SWT.LEFT, SWT.CENTER, false, false, 1, 1) );
         message = new Text( container, SWT.BORDER | SWT.READ_ONLY );
         message.setEditable( false );
-        message.setLayoutData( new GridData( SWT.FILL, SWT.CENTER, true, false, 2, 1 ) );
+        message.setLayoutData( new GridData( SWT.FILL, SWT.CENTER, true, false, 3, 1 ) );
 
         return container;
     }
