@@ -34,7 +34,7 @@
   <repositories>
     <repository>
       <id>eclipse</id>
-      <url>http://download.eclipse.org/eclipse/updates/3.8milestones</url>
+      <url>http://download.eclipse.org/eclipse/updates/3.8</url>
       <layout>p2</layout>
     </repository>
   </repositories>
