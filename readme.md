@@ -16,3 +16,16 @@ If the link above does not work, which appear to be the case on some/many Linux 
 p2browser can be started using the following command on command line
 
     javaws  http://ifedorenko.github.com/p2-browser/javaws/com.ifedorenko.p2browser.jnlp
+
+## Build and run locally
+
+  $ mvn package
+  # jnlp might fail for you but it is not needed for launching.
+  $ cd com.ifedorenko.p2browser.rcp/target/products/com.ifedorenko.p2browser.rcp
+  # find apropriate location based on your IDE
+  $ ls
+  # on OSX:
+  $ cd com.ifedorenko.p2browser.rcp/target/products/com.ifedorenko.p2browser.rcp/macosx/cocoa/x86_64
+  $ ./p2browser
+
+
