@@ -28,7 +28,6 @@
     <module>com.ifedorenko.p2browser</module>
     <module>com.ifedorenko.p2browser.feature</module>
     <module>com.ifedorenko.p2browser.rcp</module>
-    <module>com.ifedorenko.p2browser.jnlp</module>
   </modules>
 
   <repositories>
@@ -38,7 +37,7 @@
       <layout>p2</layout>
     </repository>
   </repositories>
-  
+
   <pluginRepositories>
     <pluginRepository>
       <id>tycho-snapshots</id>
@@ -96,4 +95,12 @@
     </plugins>
   </build>
 
+  <profiles>
+    <profile>
+      <id>jnlp</id>
+      <modules>
+        <module>com.ifedorenko.p2browser.jnlp</module>
+      </modules>
+    </profile>
+  </profiles>
 </project>
