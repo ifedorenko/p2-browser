@@ -44,6 +44,12 @@
             </goals>
           </execution>
         </executions>
+        <configuration>
+          <formats>
+            <linux>tar.gz</linux>
+            <macosx>tar.gz</macosx>
+          </formats>
+        </configuration>
       </plugin>
     </plugins>
   </build>
