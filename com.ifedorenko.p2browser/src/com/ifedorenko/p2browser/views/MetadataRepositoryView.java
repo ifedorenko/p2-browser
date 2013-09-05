@@ -33,11 +33,17 @@ import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.equinox.internal.p2.metadata.repository.CompositeMetadataRepository;
 import org.eclipse.equinox.internal.p2.updatesite.artifact.UpdateSiteArtifactRepository;
 import org.eclipse.equinox.internal.p2.updatesite.metadata.UpdateSiteMetadataRepository;
+import org.eclipse.equinox.p2.core.IProvisioningAgent;
 import org.eclipse.equinox.p2.core.ProvisionException;
 import org.eclipse.equinox.p2.metadata.IInstallableUnit;
+import org.eclipse.equinox.p2.metadata.expression.ExpressionUtil;
+import org.eclipse.equinox.p2.query.ExpressionMatchQuery;
 import org.eclipse.equinox.p2.query.IQueryable;
 import org.eclipse.equinox.p2.query.QueryUtil;
 import org.eclipse.equinox.p2.repository.IRepository;
+import org.eclipse.equinox.p2.repository.artifact.IArtifactDescriptor;
+import org.eclipse.equinox.p2.repository.artifact.IArtifactRepository;
+import org.eclipse.equinox.p2.repository.artifact.IArtifactRepositoryManager;
 import org.eclipse.equinox.p2.repository.metadata.IMetadataRepository;
 import org.eclipse.equinox.p2.repository.metadata.IMetadataRepositoryManager;
 import org.eclipse.jface.dialogs.IDialogConstants;
@@ -403,31 +409,19 @@ public class MetadataRepositoryView
     {
         DirectoryDialog fd = new DirectoryDialog( getViewSite().getShell() );
         final String path = fd.open();
-        final List<IMetadataRepository> repositories =
-            new ArrayList<IMetadataRepository>( toMetadataRepositories( this.repositories ) );
         Job job = new Job( "Saving repository" )
         {
             @Override
             protected IStatus run( IProgressMonitor monitor )
             {
-                IMetadataRepositoryManager repoMgr = Activator.getRepositoryManager();
                 try
                 {
                     File directory = new File( path );
                     directory.mkdirs();
-                    IMetadataRepository target =
-                        repoMgr.createRepository( directory.toURI(), directory.getName(),
-                                                  IMetadataRepositoryManager.TYPE_SIMPLE_REPOSITORY,
-                                                  new HashMap<String, String>() );
 
-                    Set<IInstallableUnit> units = new LinkedHashSet<IInstallableUnit>();
+                    saveInstallableUnitsMetadata( directory, monitor );
 
-                    for ( IMetadataRepository repositoy : repositories )
-                    {
-                        units.addAll( repositoy.query( QueryUtil.ALL_UNITS, monitor ).toUnmodifiableSet() );
-                    }
-
-                    target.addInstallableUnits( units );
+                    saveArtifactsMeatdata( directory, monitor );
 
                     return Status.OK_STATUS;
                 }
@@ -696,6 +690,54 @@ public class MetadataRepositoryView
                                  "Problems loading repository", null );
             return status;
         }
+    }
+
+    void saveInstallableUnitsMetadata( File directory, IProgressMonitor monitor )
+        throws ProvisionException
+    {
+        IMetadataRepositoryManager repoMgr = Activator.getRepositoryManager();
+
+        IMetadataRepository target =
+            repoMgr.createRepository( directory.toURI(), directory.getName(),
+                                      IMetadataRepositoryManager.TYPE_SIMPLE_REPOSITORY, new HashMap<String, String>() );
+
+        Set<IInstallableUnit> units = new LinkedHashSet<IInstallableUnit>();
+
+        final Collection<IMetadataRepository> repositories = toMetadataRepositories( this.repositories );
+
+        for ( IMetadataRepository repository : repositories )
+        {
+            units.addAll( repository.query( QueryUtil.ALL_UNITS, monitor ).toUnmodifiableSet() );
+        }
+
+        target.addInstallableUnits( units );
+    }
+
+    void saveArtifactsMeatdata( File directory, IProgressMonitor monitor )
+        throws ProvisionException
+    {
+        final IProvisioningAgent provisioningAgent = Activator.getDefault().getProvisioningAgent();
+
+        final IArtifactRepositoryManager repoMgr =
+            (IArtifactRepositoryManager) provisioningAgent.getService( IArtifactRepositoryManager.SERVICE_NAME );
+
+        final IArtifactRepository target =
+            repoMgr.createRepository( directory.toURI(), directory.getName(),
+                                      IArtifactRepositoryManager.TYPE_SIMPLE_REPOSITORY, new HashMap<String, String>() );
+
+        final Set<IArtifactDescriptor> artifacts = new LinkedHashSet<IArtifactDescriptor>();
+
+        final ExpressionMatchQuery<IArtifactDescriptor> ALL_ARTIFACTS =
+            new ExpressionMatchQuery<IArtifactDescriptor>( IArtifactDescriptor.class, ExpressionUtil.TRUE_EXPRESSION );
+
+        for ( final URI location : repositories )
+        {
+            final IArtifactRepository repository = repoMgr.loadRepository( location, monitor );
+
+            artifacts.addAll( repository.descriptorQueryable().query( ALL_ARTIFACTS, monitor ).toUnmodifiableSet() );
+        }
+
+        target.addDescriptors( artifacts.toArray( new IArtifactDescriptor[artifacts.size()] ), monitor );
     }
 
     private static String trim( String str )
