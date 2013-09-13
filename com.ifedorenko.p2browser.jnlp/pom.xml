@@ -25,7 +25,7 @@
   <packaging>eclipse-application</packaging>
 
   <properties>
-    <jnlp.codebase>file://${project.build.directory}/product/eclipse</jnlp.codebase>
+    <jnlp.codebase>file:///${project.build.directory}/product/eclipse</jnlp.codebase>
     <jnlp.deleteUnpackedJars>false</jnlp.deleteUnpackedJars>
   </properties>
 
