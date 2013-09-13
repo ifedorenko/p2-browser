@@ -16,3 +16,7 @@ If the link above does not work, which appear to be the case on some/many Linux 
 p2browser can be started using the following command on command line
 
     javaws  http://ifedorenko.github.com/p2-browser/javaws/com.ifedorenko.p2browser.jnlp
+
+p2browser uses the proxy configuration from the Java Control Panel. You should configure the 
+proxy server manually (option 'Use proxy server') because 'Use browser settings' doesn't work and 
+'Use automatic proxy configuration script' is not supported.
