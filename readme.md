@@ -19,7 +19,9 @@ run p2-browser as a standalone RCP application
 * Clone this git repository locally
 * From base directory of the clone run the following command
 
+```
     <path-to-maven-install>/bin/mvn clean package
+```
 
 * RCP applications for all enabled platforms will be created under com.ifedorenko.p2browser.rcp/target/products directory.
   Both packed and unpacked versions are created
