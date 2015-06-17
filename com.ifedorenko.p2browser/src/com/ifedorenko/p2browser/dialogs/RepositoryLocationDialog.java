@@ -94,15 +94,17 @@ public class RepositoryLocationDialog
     {
         super.create();
 
+        combo.add( "http://download.eclipse.org/releases/mars" );
         combo.add( "http://download.eclipse.org/releases/luna" );
-        combo.add( "http://download.eclipse.org/releases/kepler" );
+        // combo.add( "http://download.eclipse.org/releases/kepler" );
         // combo.add( "http://download.eclipse.org/releases/juno" );
         // combo.add( "http://download.eclipse.org/releases/indigo" );
         // combo.add( "http://download.eclipse.org/releases/helios" );
         // combo.add( "http://download.eclipse.org/releases/galileo" );
 
-        combo.add( "http://download.eclipse.org/eclipse/updates/4.4milestones" );
-        combo.add( "http://download.eclipse.org/eclipse/updates/4.3" );
+        combo.add( "http://download.eclipse.org/eclipse/updates/4.5" );
+        combo.add( "http://download.eclipse.org/eclipse/updates/4.4" );
+        // combo.add( "http://download.eclipse.org/eclipse/updates/4.3" );
         // combo.add( "http://download.eclipse.org/eclipse/updates/4.2" );
         // combo.add( "http://download.eclipse.org/eclipse/updates/3.8" );
         // combo.add( "http://download.eclipse.org/eclipse/updates/3.7" );
