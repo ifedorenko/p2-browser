@@ -277,22 +277,22 @@ public class MetadataRepositoryView
                 lblView.setText( "View" );
             }
             {
-                final Button btnGroupInlcuded = new Button( composite, SWT.CHECK );
-                GridData gd_btnGroupInlcuded = new GridData( SWT.LEFT, SWT.CENTER, false, false, 1, 1 );
-                gd_btnGroupInlcuded.horizontalIndent = 10;
-                btnGroupInlcuded.setLayoutData( gd_btnGroupInlcuded );
-                btnGroupInlcuded.addSelectionListener( new SelectionAdapter()
+                final Button btnGroupIncluded = new Button( composite, SWT.CHECK );
+                GridData gd_btnGroupIncluded = new GridData( SWT.LEFT, SWT.CENTER, false, false, 1, 1 );
+                gd_btnGroupIncluded.horizontalIndent = 10;
+                btnGroupIncluded.setLayoutData( gd_btnGroupIncluded );
+                btnGroupIncluded.addSelectionListener( new SelectionAdapter()
                 {
                     @Override
                     public void widgetSelected( SelectionEvent e )
                     {
-                        groupIncludedIUs = btnGroupInlcuded.getSelection();
+                        groupIncludedIUs = btnGroupIncluded.getSelection();
                         refreshTreeJob.schedule( 500L );
                     }
                 } );
-                btnGroupInlcuded.setSelection( groupIncludedIUs );
-                toolkit.adapt( btnGroupInlcuded, true, true );
-                btnGroupInlcuded.setText( "Group inlcuded" );
+                btnGroupIncluded.setSelection( groupIncludedIUs );
+                toolkit.adapt( btnGroupIncluded, true, true );
+                btnGroupIncluded.setText( "Group included" );
             }
             {
                 final Button btnChildRepositories = new Button( composite, SWT.CHECK );
