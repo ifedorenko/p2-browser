@@ -292,7 +292,7 @@ public class MetadataRepositoryView
                 } );
                 btnGroupInlcuded.setSelection( groupIncludedIUs );
                 toolkit.adapt( btnGroupInlcuded, true, true );
-                btnGroupInlcuded.setText( "Group inlcuded" );
+                btnGroupInlcuded.setText( "Group included" );
             }
             {
                 final Button btnChildRepositories = new Button( composite, SWT.CHECK );
