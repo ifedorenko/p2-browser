@@ -21,7 +21,7 @@
   <packaging>pom</packaging>
 
   <properties>
-    <tycho-version>0.19.0</tycho-version>
+    <tycho-version>0.26.0</tycho-version>
   </properties>
 
   <modules>
@@ -33,7 +33,7 @@
   <repositories>
     <repository>
       <id>eclipse</id>
-      <url>http://download.eclipse.org/eclipse/updates/3.8</url>
+      <url>http://download.eclipse.org/eclipse/updates/4.6</url>
       <layout>p2</layout>
     </repository>
   </repositories>
