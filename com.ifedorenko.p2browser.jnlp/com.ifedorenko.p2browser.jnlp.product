@@ -6,7 +6,7 @@
       uid="com.ifedorenko.p2browser.jnlp" 
       id="com.ifedorenko.p2browser.p2browser" 
       application="com.ifedorenko.p2browser.application" 
-      version="1.0.0.qualifier" 
+      version="1.0.1.qualifier" 
       useFeatures="true" 
       includeLaunchers="false">
 
